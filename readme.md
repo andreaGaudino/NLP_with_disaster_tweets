@@ -7,6 +7,11 @@
         - [Abstract](#abstract)
         - [Dataset Description](#dataset-description)
         - [Metrics Description](#metrics-description)
+    - [Setup](#setup)
+        - [Create and Activate the Virtual Environment](#create-and-activate-the-virtual-environment)
+        - [Install Dependencies](#install-dependencies)
+        - [Run the Notebooks](#run-the-notebooks)
+    - [Project Structure](#project-structure)
 
 <!-- /TOC -->
 
@@ -27,3 +32,54 @@ Files
 We evaluate performance using the F1-score. Since this is a binary classification task and the dataset may be imbalanced, F1-score is more appropriate than accuracy. A simple accuracy metric could be misleading, as a model predicting mostly the majority class might still achieve high accuracy while performing poorly on the minority class.
 
 The F1-score balances avoiding false alarms and detecting real disasters. This is important in our context, since both missing a real disaster (false negative) and incorrectly flagging a non-disaster tweet (false positive) can negatively impact the usefulness of the system.
+
+## Setup
+### Create and Activate the Virtual Environment
+From the root of the project, create a virtual environment and activate it.
+
+**Windows (Git Bash / Command Prompt):**
+```bash
+python -m venv .venv
+source .venv/Scripts/activate   # Git Bash
+# or
+.venv\Scripts\activate          # Command Prompt
+```
+
+**macOS / Linux:**
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### Install Dependencies
+With the virtual environment active, install all required packages:
+```bash
+pip install -r requirements.txt
+```
+
+To use the notebooks in VS Code, also install the Jupyter kernel:
+```bash
+pip install ipykernel
+python -m ipykernel install --user --name=nlp_disaster --display-name "Python (nlp_disaster)"
+```
+
+### Run the Notebooks
+1. Open the project folder in VS Code.
+2. Open any `.ipynb` file under `notebook/`.
+3. Click **Select Kernel** (top right) and choose **Python (nlp_disaster)**.
+4. Run cells with `Shift+Enter` or click **Run All**.
+
+## Project Structure
+```
+NLP_with_disaster_tweets/
+├── .venv/                              # Virtual environment (not tracked by git)
+├── data/
+│   ├── train.csv                       # Original training data
+│   ├── test.csv                        # Original test data
+│   └── augmented_train.csv             # Augmented training data (generated)
+├── notebook/
+│   └── data_cleaning_augmentation.ipynb  # Data cleaning and augmentation pipeline
+├── .gitignore
+├── readme.md
+└── requirements.txt
+```
