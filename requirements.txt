@@ -1,6 +1,24 @@
 pandas
 numpy
 matplotlib
+seaborn
 deep_translator
 tqdm
-seaborn
+scikit-learn
+tensorflow
+ipykernel
+
+# TensorFlow — install the right version for your platform:
+#
+# Windows / Linux:
+#   pip install tensorflow
+#
+# Mac Apple Silicon (M1/M2/M3) — requires two packages:
+#   pip install tensorflow-macos tensorflow-metal
+#
+# Mac Intel:
+#   pip install tensorflow
+#
+# NOTE: TensorFlow requires Python 3.9–3.12.
+# Python 3.13+ is not supported. See: https://www.tensorflow.org/install/pip
+tensorflow

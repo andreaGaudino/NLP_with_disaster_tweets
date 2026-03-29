@@ -8,10 +8,16 @@
         - [Dataset Description](#dataset-description)
         - [Metrics Description](#metrics-description)
     - [Setup](#setup)
+        - [Python Version](#python-version)
         - [Create and Activate the Virtual Environment](#create-and-activate-the-virtual-environment)
         - [Install Dependencies](#install-dependencies)
+        - [Download External Data](#download-external-data)
+            - [Kaggle competition data](#kaggle-competition-data)
+            - [GloVe embeddings required for bilstm_glove.ipynb](#glove-embeddings-required-for-bilstm_gloveipynb)
         - [Run the Notebooks](#run-the-notebooks)
     - [Project Structure](#project-structure)
+    - [Results](#results)
+    - [References](#references)
 
 <!-- /TOC -->
 
@@ -19,51 +25,112 @@
 
 ### Abstract
 Social media platforms such as Twitter are widely used during emergencies and natural disasters, and organizations such as disaster relief agencies and news outlets are interested in automatically monitoring these streams. However, distinguishing between tweets that report real disaster events and those that use disaster-related language metaphorically remains a challenging NLP task.
-In this project, we will develop and evaluate deep learning models for binary classification of disaster-related tweets. The final outcome is a trained system that predicts whether a tweet refers to a real disaster or not. We will compare different modeling strategies using standard evaluation metrics. The project is inspired by the Kaggle competition Natural Language Processing with Disaster Tweets.
+
+In this project, we develop and evaluate deep learning models for binary classification of disaster-related tweets. The final outcome is a trained system that predicts whether a tweet refers to a real disaster or not. We compare different modeling strategies using standard evaluation metrics. The project is inspired by the Kaggle competition Natural Language Processing with Disaster Tweets.
+
 References: Addison Howard, devrishi, Phil Culliton, and Yufeng Guo. Natural Language Processing with Disaster Tweets. Kaggle, 2019. https://kaggle.com/competitions/nlp-getting-started
 
 ### Dataset Description
-We utilize a supervised text classification dataset sourced from Kaggle, containing a total of 10,876 tweets (split into 7,613 training and 3,263 testing samples). The dataset poses a classic Natural Language Processing (NLP) binary classification problem. Each data point provides the raw text sequence of the tweet, accompanied by two supplementary metadata features: location and keyword. A core technical challenge of this project will involve not only parsing the noisy, unstructured text data, but also engineering the potentially sparse metadata to improve the classifier's predictive performance and semantic understanding.
-Files
-/train.csv
-/test.csv
+We utilize a supervised text classification dataset sourced from Kaggle, containing a total of 10,876 tweets (split into 7,613 training and 3,263 testing samples). The dataset poses a classic Natural Language Processing (NLP) binary classification problem. Each data point provides the raw text sequence of the tweet, accompanied by two supplementary metadata features: location and keyword.
+
+Files:
+- `data/train.csv`
+- `data/test.csv`
 
 ### Metrics Description
 We evaluate performance using the F1-score. Since this is a binary classification task and the dataset may be imbalanced, F1-score is more appropriate than accuracy. A simple accuracy metric could be misleading, as a model predicting mostly the majority class might still achieve high accuracy while performing poorly on the minority class.
 
-The F1-score balances avoiding false alarms and detecting real disasters. This is important in our context, since both missing a real disaster (false negative) and incorrectly flagging a non-disaster tweet (false positive) can negatively impact the usefulness of the system.
+The F1-score balances avoiding false alarms and detecting real disasters. Both missing a real disaster (false negative) and incorrectly flagging a non-disaster tweet (false positive) reduce the usefulness of the system.
 
 ## Setup
-### Create and Activate the Virtual Environment
-From the root of the project, create a virtual environment and activate it.
 
-**Windows (Git Bash / Command Prompt):**
+### Python Version
+
+> **TensorFlow requires Python 3.9–3.12.** Python 3.13+ is not supported.
+> See the official guide: https://www.tensorflow.org/install/pip
+>
+> This project was developed and tested with **Python 3.12.10**.
+> Download (Windows 64-bit): https://www.python.org/ftp/python/3.12.10/python-3.12.10-amd64.exe
+
+### Create and Activate the Virtual Environment
+
+**Windows (Git Bash):**
 ```bash
-python -m venv .venv
-source .venv/Scripts/activate   # Git Bash
-# or
-.venv\Scripts\activate          # Command Prompt
+py -3.12 -m venv .venv
+source .venv/Scripts/activate
+```
+
+**Windows (Command Prompt):**
+```bash
+py -3.12 -m venv .venv
+.venv\Scripts\activate
 ```
 
 **macOS / Linux:**
 ```bash
-python3 -m venv .venv
+python3.12 -m venv .venv
 source .venv/bin/activate
 ```
 
 ### Install Dependencies
-With the virtual environment active, install all required packages:
+
+With the virtual environment active:
+
 ```bash
 pip install -r requirements.txt
 ```
 
-To use the notebooks in VS Code, also install the Jupyter kernel:
+> **Mac Apple Silicon (M1/M2/M3):** TensorFlow requires two separate packages.
+> After running `pip install -r requirements.txt`, also run:
+> ```bash
+> pip uninstall tensorflow
+> pip install tensorflow-macos tensorflow-metal
+> ```
+> `tensorflow-metal` enables GPU acceleration via Apple's Metal API (MPS).
+> Without it, training runs on CPU only.
+
+To use the notebooks in VS Code, install the Jupyter kernel:
 ```bash
-pip install ipykernel
 python -m ipykernel install --user --name=nlp_disaster --display-name "Python (nlp_disaster)"
 ```
 
+### Download External Data
+
+#### 1. Kaggle competition data
+Download `train.csv` and `test.csv` from the competition page and place them in `data/`:
+```
+https://www.kaggle.com/competitions/nlp-getting-started/data
+```
+
+#### 2. GloVe embeddings (required for `bilstm_glove.ipynb`)
+The BiLSTM model uses pre-trained GloVe word vectors. The file is 822 MB and is **not tracked by git**.
+
+Download `glove.6B.100d.txt` from Kaggle:
+```
+https://www.kaggle.com/datasets/danielwillgeorge/glove6b100dtxt
+```
+
+Place the file directly in `data/`:
+```
+data/glove.6B.100d.txt
+```
+
+The notebook already points to this path:
+```python
+GLOVE_PATH = '../data/glove.6B.100d.txt'
+```
+
 ### Run the Notebooks
+
+Run the notebooks **in order** — each one depends on files produced by the previous one:
+
+| Order | Notebook | Produces |
+|-------|----------|----------|
+| 1 | `notebook/data_cleaning_augmentation.ipynb` | `data/augmented_train.csv`, `data/test_cleaned.csv` |
+| 2 | `notebook/eda.ipynb` | plots in `images/` |
+| 3 | `notebook/bilstm_glove.ipynb` | `data/submission_bilstm_glove.csv`, models in `models/` |
+
+To run in VS Code:
 1. Open the project folder in VS Code.
 2. Open any `.ipynb` file under `notebook/`.
 3. Click **Select Kernel** (top right) and choose **Python (nlp_disaster)**.
@@ -76,21 +143,35 @@ NLP_with_disaster_tweets/
 ├── data/
 │   ├── train.csv                       # Original training data
 │   ├── test.csv                        # Original test data
+│   ├── glove.6B.100d.txt               # GloVe embeddings — download separately (822 MB, not on git)
 │   ├── augmented_train.csv             # Augmented + cleaned training data (generated)
-│   └── test_cleaned.csv                # Cleaned test data (generated)
-├── images/
-│   ├── eda_01_target_distribution.png  # Target class balance (57% / 43%)
-│   ├── eda_02_keyword_analysis.png     # Disaster rate per keyword
-│   ├── eda_03_meta_features.png        # Meta-features distribution by class
-│   ├── eda_04_unigrams.png             # Top 20 unigrams per class
-│   ├── eda_04_bigrams.png              # Top 20 bigrams per class
-│   ├── eda_04_trigrams.png             # Top 20 trigrams per class
-│   └── eda_05_train_test_consistency.png # Train/test distribution comparison
+│   ├── test_cleaned.csv                # Cleaned test data (generated)
+│   └── submission_bilstm_glove.csv     # BiLSTM + GloVe predictions (Kaggle public F1: 0.809)
+├── images/                             # EDA plots and BiLSTM training curves (generated)
+├── models/                             # Saved BiLSTM model checkpoints per fold (generated, not on git)
 ├── notebook/
 │   ├── data_cleaning_augmentation.ipynb  # Data cleaning, mislabeled correction,
 │   │                                     # meta-features, back-translation augmentation
-│   └── eda.ipynb                         # Exploratory data analysis
+│   ├── eda.ipynb                         # Exploratory data analysis
+│   └── bilstm_glove.ipynb                # BiLSTM + GloVe baseline model (CV OOF F1: 0.776)
 ├── .gitignore
 ├── readme.md
 └── requirements.txt
 ```
+
+## Results
+
+| Model | CV F1 (OOF) | Kaggle Public F1 |
+|-------|-------------|------------------|
+| BiLSTM + GloVe 100d | 0.776 | 0.809 |
+| BERT fine-tuning | — | — |
+| BERT + LoRA | — | — |
+
+## References
+
+- Project 1: https://github.com/nikjohn7/Disaster-Tweets-Kaggle
+- Project 2: https://www.kaggle.com/code/bkanupam/disaster-tweets-bilstm-fasttext
+- Project 4: https://www.kaggle.com/code/akashkr/tf-keras-tutorial-bi-lstm-glove-gru-part-6
+- Project 5: https://github.com/hsiehbocheng/natural-language-processing-with-disaster-tweets/blob/main/README.md
+- Project 7: https://www.kaggle.com/code/gunesevitan/nlp-with-disaster-tweets-eda-cleaning-and-bert
+- Challenge Kaggle: https://www.kaggle.com/competitions/nlp-getting-started/overview

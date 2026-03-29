@@ -1,1 +1,24 @@
-.venv
+# Virtual environment
+.venv/
+
+# Large data files — download instructions in README
+# 822 MB cannot be stored in GitHub
+data/glove.6B.100d.txt 
+# data/augmented_train.csv
+# data/test_cleaned.csv
+
+# Submission files
+# data/submission_*.csv
+
+# Model checkpoints
+models/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
