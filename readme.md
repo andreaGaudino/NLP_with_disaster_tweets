@@ -17,6 +17,7 @@
         - [Run the Notebooks](#run-the-notebooks)
     - [Project Structure](#project-structure)
     - [Results](#results)
+    - [Use of AI Assistance](#use-of-ai-assistance)
     - [References](#references)
 
 <!-- /TOC -->
