@@ -5,8 +5,11 @@ seaborn
 deep_translator
 tqdm
 scikit-learn
-tensorflow
 ipykernel
+transformers
+datasets
+torch
+accelerate
 
 # TensorFlow — install the right version for your platform:
 #

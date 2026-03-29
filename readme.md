@@ -161,10 +161,10 @@ NLP_with_disaster_tweets/
 
 ## Results
 
-| Model | CV F1 (OOF) | Kaggle Public F1 |
-|-------|-------------|------------------|
-| BiLSTM + GloVe 100d | 0.776 | 0.809 |
-| BERT fine-tuning | — | — |
+| Model | Val F1 | Kaggle Public F1 |
+|-------|--------|------------------|
+| BiLSTM + GloVe 100d | 0.776 (OOF, 5-fold CV) | 0.809 |
+| BERT fine-tuning (bert-base-uncased) | 0.838 | 0.839 |
 | BERT + LoRA | — | — |
 
 ## References
