@@ -190,7 +190,7 @@ NLP_with_disaster_tweets/
 |-------|--------|------------------|-----------------|
 | BiLSTM + GloVe 100d | 0.776 (OOF, 5-fold CV) | 0.809 | ~1M (100%) |
 | BERT fine-tuning (bert-base-uncased) | 0.838 | 0.839 | ~110M (100%) |
-| BERT + LoRA (r=8, query+value) | 0.827 | 0.827 | ~300K (0.27%) |
+| BERT + LoRA (r=8, query+value) | 0.8128 | 0.84554 | ~887K (0.65%) |
 
 ## References
 
@@ -200,3 +200,4 @@ NLP_with_disaster_tweets/
 - Project 5: https://github.com/hsiehbocheng/natural-language-processing-with-disaster-tweets/blob/main/README.md
 - Project 7: https://www.kaggle.com/code/gunesevitan/nlp-with-disaster-tweets-eda-cleaning-and-bert
 - Challenge Kaggle: https://www.kaggle.com/competitions/nlp-getting-started/overview
+- berttweet: https://www.kaggle.com/code/deepaktripathiuk/eda-data-augment-predict-with-roberta-n-ctf-idf
