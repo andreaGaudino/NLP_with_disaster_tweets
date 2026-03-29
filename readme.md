@@ -192,6 +192,28 @@ NLP_with_disaster_tweets/
 | BERTweet fine-tuning (vinai/bertweet-base) | 0.821 | 0.839 | ~135M (100%) |
 | BERTtweet + LoRA (r=8, query+value) | 0.8128 | **0.84554** | ~887K (0.65%) |
 
+## Use of AI Assistance
+
+In this project, AI tools were used as an accelerator for development,  not as a replacement for critical thinking. The distinction matters:  every architectural decision, every experimental choice, and every line of code was understood, validated, and intentionally included by the team.
+
+The primary use of AI was to systematically scan a large number of  external Kaggle notebooks and research papers — a task that would have  taken days manually. For each source, we asked targeted questions such as:
+- *"What model architecture does this notebook use?"*
+- *"Is there any implementation detail here worth incorporating into our 
+  pipeline?"*
+- *"Does this notebook have data leakage issues?"*
+
+AI assistance helped surface small but impactful implementation details  that are easy to overlook when reading papers or notebooks quickly. A  concrete example: while scanning a reference notebook (datafan07,  Project 9), AI flagged the use of a **warmup scheduler** (`warmup_ratio=0.1`) as a training stability improvement worth 
+incorporating. This detail was applied consistently across our BERT and 
+LoRA notebooks and contributed to more stable convergence curves.
+
+Similarly, AI helped identify that `finiteautomata/bertweet-base-sentiment-analysis`  was built on `vinai/bertweet-base` —  a RoBERTa model pre-trained on 850M tweets. This insight led us to  implement BERTweet as our final model, which achieved our best Kaggle  score of **0.846**.
+
+AI was used to write cleaner, more structured code faster — but always  starting from a team-defined template specifying what each cell should  accomplish. The workflow was: define the objective → sketch the structure  → use AI to fill in boilerplate and suggest best practices → review and  validate every line. This approach kept code ownership with the team  while eliminating repetitive scaffolding work.
+
+AI did not choose our experimental pipeline, decide which models to  compare, or determine what constitutes a methodologically sound  evaluation. Decisions such as filtering augmented rows from validation,  correcting 18 mislabeled samples, using `target_relabeled` instead of  `target`, and applying back-translation augmentation were all made by  the team after understanding the data and the task.
+
+The result is a project where AI accelerated execution without  compromising the integrity of the research process.
+
 ## References
 
 - Project 1: https://github.com/nikjohn7/Disaster-Tweets-Kaggle
