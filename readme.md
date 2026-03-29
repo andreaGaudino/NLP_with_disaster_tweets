@@ -139,21 +139,41 @@ To run in VS Code:
 ## Project Structure
 ```
 NLP_with_disaster_tweets/
-├── .venv/                              # Virtual environment (not tracked by git)
+├── .venv/                                    # Virtual environment (not tracked by git)
 ├── data/
-│   ├── train.csv                       # Original training data
-│   ├── test.csv                        # Original test data
-│   ├── glove.6B.100d.txt               # GloVe embeddings — download separately (822 MB, not on git)
-│   ├── augmented_train.csv             # Augmented + cleaned training data (generated)
-│   ├── test_cleaned.csv                # Cleaned test data (generated)
-│   └── submission_bilstm_glove.csv     # BiLSTM + GloVe predictions (Kaggle public F1: 0.809)
-├── images/                             # EDA plots and BiLSTM training curves (generated)
-├── models/                             # Saved BiLSTM model checkpoints per fold (generated, not on git)
+│   ├── images/
+│   │   ├── bert/
+│   │   │   └── bert_training_curves.png      # BERT training curves
+│   │   ├── bilstmAndGlove/
+│   │   │   ├── bilstm_fold1_curves.png       # BiLSTM training curves per fold
+│   │   │   ├── bilstm_fold2_curves.png
+│   │   │   ├── bilstm_fold3_curves.png
+│   │   │   ├── bilstm_fold4_curves.png
+│   │   │   └── bilstm_fold5_curves.png
+│   │   └── eda/
+│   │       ├── eda_01_target_distribution.png
+│   │       ├── eda_02_keyword_analysis.png
+│   │       ├── eda_03_meta_features.png
+│   │       ├── eda_04_unigrams.png
+│   │       ├── eda_04_bigrams.png
+│   │       ├── eda_04_trigrams.png
+│   │       └── eda_05_train_test_consistency.png
+│   ├── train.csv                             # Original training data
+│   ├── test.csv                              # Original test data
+│   ├── glove.6B.100d.txt                     # GloVe embeddings — download separately (822 MB, not on git)
+│   ├── augmented_train.csv                   # Augmented + cleaned training data (generated)
+│   ├── test_cleaned.csv                      # Cleaned test data (generated)
+│   ├── submission_bilstm_glove.csv           # BiLSTM + GloVe predictions (Kaggle public F1: 0.809)
+│   └── submission_bert.csv                   # BERT predictions (Kaggle public F1: 0.839)
+├── models/
+│   ├── bert/                                 # BERT checkpoints (generated, not on git)
+│   └── bilstm/                               # BiLSTM checkpoints per fold (generated, not on git)
 ├── notebook/
-│   ├── data_cleaning_augmentation.ipynb  # Data cleaning, mislabeled correction,
-│   │                                     # meta-features, back-translation augmentation
-│   ├── eda.ipynb                         # Exploratory data analysis
-│   └── bilstm_glove.ipynb                # BiLSTM + GloVe baseline model (CV OOF F1: 0.776)
+│   ├── data_cleaning_augmentation.ipynb      # Data cleaning, mislabeled correction,
+│   │                                         # meta-features, back-translation augmentation
+│   ├── eda.ipynb                             # Exploratory data analysis
+│   ├── bilstm_glove.ipynb                    # BiLSTM + GloVe baseline (CV OOF F1: 0.776, Kaggle: 0.809)
+│   └── bert.ipynb                            # BERT fine-tuning (Val F1: 0.838, Kaggle: 0.839)
 ├── .gitignore
 ├── readme.md
 └── requirements.txt
