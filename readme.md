@@ -76,9 +76,20 @@ NLP_with_disaster_tweets/
 ├── data/
 │   ├── train.csv                       # Original training data
 │   ├── test.csv                        # Original test data
-│   └── augmented_train.csv             # Augmented training data (generated)
+│   ├── augmented_train.csv             # Augmented + cleaned training data (generated)
+│   └── test_cleaned.csv                # Cleaned test data (generated)
+├── images/
+│   ├── eda_01_target_distribution.png  # Target class balance (57% / 43%)
+│   ├── eda_02_keyword_analysis.png     # Disaster rate per keyword
+│   ├── eda_03_meta_features.png        # Meta-features distribution by class
+│   ├── eda_04_unigrams.png             # Top 20 unigrams per class
+│   ├── eda_04_bigrams.png              # Top 20 bigrams per class
+│   ├── eda_04_trigrams.png             # Top 20 trigrams per class
+│   └── eda_05_train_test_consistency.png # Train/test distribution comparison
 ├── notebook/
-│   └── data_cleaning_augmentation.ipynb  # Data cleaning and augmentation pipeline
+│   ├── data_cleaning_augmentation.ipynb  # Data cleaning, mislabeled correction,
+│   │                                     # meta-features, back-translation augmentation
+│   └── eda.ipynb                         # Exploratory data analysis
 ├── .gitignore
 ├── readme.md
 └── requirements.txt
