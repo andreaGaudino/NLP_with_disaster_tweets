@@ -189,8 +189,8 @@ NLP_with_disaster_tweets/
 | Model | Val F1 | Kaggle Public F1 | Trainable params |
 |-------|--------|------------------|-----------------|
 | BiLSTM + GloVe 100d | 0.776 (OOF, 5-fold CV) | 0.809 | ~1M (100%) |
-| BERT fine-tuning (bert-base-uncased) | 0.838 | 0.839 | ~110M (100%) |
-| BERT + LoRA (r=8, query+value) | 0.8128 | 0.84554 | ~887K (0.65%) |
+| BERTweet fine-tuning (vinai/bertweet-base) | 0.821 | 0.839 | ~135M (100%) |
+| BERTtweet + LoRA (r=8, query+value) | 0.8128 | **0.84554** | ~887K (0.65%) |
 
 ## References
 
