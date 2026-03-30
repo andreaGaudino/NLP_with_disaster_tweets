@@ -224,3 +224,5 @@ The result is a project where AI accelerated execution without  compromising the
 - Project 7: https://www.kaggle.com/code/gunesevitan/nlp-with-disaster-tweets-eda-cleaning-and-bert
 - Challenge Kaggle: https://www.kaggle.com/competitions/nlp-getting-started/overview
 - berttweet: https://www.kaggle.com/code/deepaktripathiuk/eda-data-augment-predict-with-roberta-n-ctf-idf
+- berttweet 2: https://github.com/vinairesearch/bertweet
+- berttweet 3: https://huggingface.co/docs/transformers/model_doc/bertweet
