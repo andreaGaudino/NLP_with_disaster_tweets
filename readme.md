@@ -192,6 +192,7 @@ NLP_with_disaster_tweets/
 | BiLSTM + GloVe 100d | 0.776 (OOF, 5-fold CV) | 0.80968 | ~1M (100%) |
 | BERTweet fine-tuning (vinai/bertweet-base) | 0.821 | 0.839 | ~135M (100%) |
 | BERTtweet + LoRA (r=8, query+value) | 0.8126 | **0.84737** | ~887K (0.65%) |
+| BERTtweer larg | 0.8122 | 0.84400 | 355M (100%) |
 
 ## Use of AI Assistance
 
