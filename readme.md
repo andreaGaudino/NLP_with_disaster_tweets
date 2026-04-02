@@ -16,6 +16,7 @@
             - [GloVe embeddings required for bilstm_glove.ipynb](#glove-embeddings-required-for-bilstm_gloveipynb)
         - [Run the Notebooks](#run-the-notebooks)
     - [Project Structure](#project-structure)
+    - [Use of Transformers](#use-of-transformers)
     - [Results](#results)
     - [Use of AI Assistance](#use-of-ai-assistance)
     - [References](#references)
@@ -184,6 +185,10 @@ NLP_with_disaster_tweets/
 ├── readme.md
 └── requirements.txt
 ```
+
+## Use of Transformers
+
+Why in this project we used the transformers architecture? **Transformers truly shine when there is a strong language component in the problem**, and specifically when one can exploit the ambiguity and richness of natural language. Outside of that domain, their use should be carefully justified.
 
 ## Results
 
