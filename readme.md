@@ -198,7 +198,8 @@ Why in this project we used the transformers architecture? **Transformers truly 
 | BERTweet fine-tuning (vinai/bertweet-base) | 0.821 | 0.839 | ~135M (100%) |
 | BERTtweet + LoRA (r=8, query+value) | 0.8126 | **0.84737** | ~887K (0.65%) |
 | Bertweet + Dora (r=16) | 0.811 | 0.84094 | 1.2 M (0.9%) |
-| BERTtweer large | 0.8122 | 0.84400 | 355M (100%) |
+| BERTtweet large | 0.8122 | 0.84400 | 355M (100%) |
+| BERTtweet large + LoRA (r=16) | 0.8113 | 0.84125 | 8 M (2.24%) |
 
 ## Use of AI Assistance
 
