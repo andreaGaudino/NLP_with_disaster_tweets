@@ -1,0 +1,248 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{lipsum}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+% =============================================================================
+% TITLE AND AUTHORS
+% =============================================================================
+
+\title{Natural Language Processing with Disaster Tweets:\\
+       From Sequential Models to Parameter-Efficient Transformers}
+
+\author{
+    \IEEEauthorblockN{Simone [Surname]}
+    \IEEEauthorblockA{\textit{EURECOM}\\
+    Simone.Surname@eurecom.fr}
+    \and
+    \IEEEauthorblockN{Andrea Gaudino}
+    \IEEEauthorblockA{\textit{EURECOM}\\
+    Andrea.Gaudino@eurecom.fr}
+    \and
+    \IEEEauthorblockN{Amjad [Surname]}
+    \IEEEauthorblockA{\textit{EURECOM}\\
+    Amjad.Surname@eurecom.fr}
+}
+
+\maketitle
+
+% =============================================================================
+% ABSTRACT
+% =============================================================================
+
+\begin{abstract}
+\lipsum[1]
+\end{abstract}
+
+\begin{IEEEkeywords}
+Natural Language Processing, Disaster Tweet Classification, BERT, BERTweet,
+LoRA, DoRA, Parameter-Efficient Fine-Tuning, PEFT
+\end{IEEEkeywords}
+
+% =============================================================================
+% I. INTRODUCTION
+% =============================================================================
+
+\section{Introduction}
+\lipsum[2]
+
+% =============================================================================
+% II. DATASET DESCRIPTION AND PREPARATION
+% =============================================================================
+
+\section{Dataset Description and Preparation}
+
+\subsection{Dataset Overview}
+\lipsum[3]
+
+\subsection{Exploratory Data Analysis}
+\lipsum[4]
+
+% Example figure placeholder
+% \begin{figure}[h]
+%     \centering
+%     \includegraphics[width=0.45\textwidth]{figures/eda_target_distribution.png}
+%     \caption{Target class distribution in the training set.}
+%     \label{fig:target_dist}
+% \end{figure}
+
+\subsection{Mislabeled Samples Correction}
+\lipsum[5]
+
+\subsection{Text Cleaning and Preprocessing}
+\lipsum[6]
+
+\subsection{Data Augmentation via Back-Translation}
+\lipsum[7]
+
+% Explain why augmentation helps full fine-tuning but hurts LoRA:
+% LoRA trains only 0.65% of parameters — noisy back-translations confuse
+% the few trainable weights. Full fine-tuning has enough capacity to
+% filter noise; PEFT cannot.
+
+% =============================================================================
+% III. MODELING APPROACH
+% =============================================================================
+
+\section{Modeling Approach}
+
+\subsection{Why Transformers for this Task}
+\lipsum[8]
+
+\subsection{Baseline: BiLSTM with GloVe Embeddings}
+\lipsum[9]
+
+\subsection{BERT Fine-Tuning}
+\lipsum[10]
+
+\subsection{BERTweet: Domain-Specific Pre-Training}
+\lipsum[11]
+
+\subsection{Parameter-Efficient Fine-Tuning with LoRA}
+\lipsum[12]
+
+% Highlight: LoRA trains only 887K / 135M = 0.65% of parameters
+% vs full fine-tuning (100%) and BiLSTM (~1M, 100%)
+
+% Example table placeholder
+% \begin{table}[h]
+% \centering
+% \caption{Parameter efficiency comparison across models.}
+% \label{tab:params}
+% \begin{tabular}{lrr}
+% \toprule
+% Model & Trainable Params & \% of Total \\
+% \midrule
+% BiLSTM + GloVe   & $\sim$1M   & 100\%  \\
+% BERT fine-tuning & $\sim$110M & 100\%  \\
+% BERTweet fine-tuning & $\sim$135M & 100\% \\
+% BERTweet + LoRA  & 887K       & 0.65\% \\
+% BERTweet + DoRA  & 887K       & 0.65\% \\
+% \bottomrule
+% \end{tabular}
+% \end{table}
+
+\subsection{DoRA: Weight-Decomposition Low-Rank Adaptation}
+\lipsum[13]
+
+\subsection{Why Augmentation Hurts LoRA but May Help Full Fine-Tuning}
+\lipsum[14]
+
+% Core argument: noise tolerance scales with the number of trainable
+% parameters. LoRA with 887K trainable params cannot filter noisy
+% back-translations the way full fine-tuning with 135M params can.
+
+\subsection{Label Smoothing and Regularization}
+\lipsum[15]
+
+% =============================================================================
+% IV. RESULTS
+% =============================================================================
+
+\section{Results}
+
+\subsection{Evaluation Metric}
+\lipsum[16]
+
+\subsection{Model Comparison}
+
+% \begin{table}[h]
+% \centering
+% \caption{Kaggle public leaderboard F1 scores.}
+% \label{tab:results}
+% \begin{tabular}{lcc}
+% \toprule
+% Model & Val F1 & Kaggle F1 \\
+% \midrule
+% BiLSTM + GloVe 100d          & 0.776 & 0.809 \\
+% BERT fine-tuning             & 0.838 & 0.839 \\
+% BERT + LoRA (r=8)            & 0.827 & 0.833 \\
+% BERTweet fine-tuning         & 0.821 & 0.839 \\
+% BERTweet + LoRA (r=8)        & 0.813 & 0.846 \\
+% BERTweet + LoRA + smoothing  & 0.813 & 0.847 \\
+% BERTweet + DoRA (r=8)        & TBD   & TBD   \\
+% BERTweet-large + smoothing   & TBD   & TBD   \\
+% \bottomrule
+% \end{tabular}
+% \end{table}
+
+\lipsum[17]
+
+\subsection{Key Findings}
+\lipsum[18]
+
+% Key insight 1: BERTweet + LoRA (0.65% params) outperforms BERTweet
+%   full fine-tuning (100% params) on Kaggle → PEFT on domain-specific
+%   model beats full fine-tuning
+% Key insight 2: label smoothing helps PEFT but hurts full fine-tuning
+% Key insight 3: augmentation hurts LoRA but may help full fine-tuning
+
+\subsection{Use of AI Assistance}
+\lipsum[19]
+
+% =============================================================================
+% V. CONCLUSION
+% =============================================================================
+
+\section{Conclusion}
+\lipsum[20]
+
+% =============================================================================
+% REFERENCES
+% =============================================================================
+
+\begin{thebibliography}{00}
+
+\bibitem{kaggle}
+A. Howard, devrishi, P. Culliton, and Y. Guo,
+``Natural Language Processing with Disaster Tweets,''
+Kaggle, 2019.
+\url{https://kaggle.com/competitions/nlp-getting-started}
+
+\bibitem{devlin2019bert}
+J. Devlin, M.-W. Chang, K. Lee, and K. Toutanova,
+``BERT: Pre-training of Deep Bidirectional Transformers for Language
+Understanding,''
+\textit{arXiv preprint arXiv:1810.04805}, 2019.
+
+\bibitem{nguyen2020bertweet}
+D. Q. Nguyen, T. Vu, and A. T. Nguyen,
+``BERTweet: A pre-trained language model for English Tweets,''
+\textit{arXiv preprint arXiv:2005.10200}, 2020.
+
+\bibitem{hu2021lora}
+E. J. Hu et al.,
+``LoRA: Low-Rank Adaptation of Large Language Models,''
+\textit{arXiv preprint arXiv:2106.09685}, 2021.
+
+\bibitem{liu2024dora}
+S.-Y. Liu et al.,
+``DoRA: Weight-Decomposed Low-Rank Adaptation,''
+\textit{arXiv preprint arXiv:2402.09353}, 2024.
+
+\bibitem{pennington2014glove}
+J. Pennington, R. Socher, and C. D. Manning,
+``GloVe: Global Vectors for Word Representation,''
+in \textit{Proc. EMNLP}, 2014.
+
+\bibitem{szegedy2016rethinking}
+C. Szegedy et al.,
+``Rethinking the Inception Architecture for Computer Vision,''
+in \textit{Proc. CVPR}, 2016.
+% Label smoothing reference
+
+\end{thebibliography}
+
+\end{document}
