@@ -23,17 +23,21 @@
        From Sequential Models to Parameter-Efficient Transformers}
 
 \author{
-    \IEEEauthorblockN{Simone [Surname]}
+    \IEEEauthorblockN{Simone Pio Candido}
     \IEEEauthorblockA{\textit{EURECOM}\\
-    Simone.Surname@eurecom.fr}
+    Simone-Pio.Candido@eurecom.fr}
     \and
     \IEEEauthorblockN{Andrea Gaudino}
     \IEEEauthorblockA{\textit{EURECOM}\\
     Andrea.Gaudino@eurecom.fr}
     \and
-    \IEEEauthorblockN{Amjad [Surname]}
+    \IEEEauthorblockN{Dario Gosmar}
     \IEEEauthorblockA{\textit{EURECOM}\\
-    Amjad.Surname@eurecom.fr}
+    Dario.Gosmar@eurecom.fr}
+    \and
+    \IEEEauthorblockN{Amjad Kallas}
+    \IEEEauthorblockA{\textit{EURECOM}\\
+    Amjad.Kallas@eurecom.fr}
 }
 
 \maketitle
@@ -43,7 +47,7 @@
 % =============================================================================
 
 \begin{abstract}
-\lipsum[1]
+Social media platforms such as Twitter are widely used during emergencies and natural disasters, and organizations such as disaster relief agencies and news outlets are interested in automatically monitoring these streams. However, distinguishing between tweets that report real disaster events and those that use disaster-related language metaphorically remains a challenging NLP task. In this project, we develop and evaluate deep learning models for binary classification of disaster-related tweets. The final outcome is a trained system that predicts whether a tweet refers to a real disaster or not. We compare different modeling strategies using standard evaluation metrics. The project is inspired by the Kaggle competition Natural Language Processing with Disaster Tweets \cite{kaggle}.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -99,7 +103,7 @@ LoRA, DoRA, Parameter-Efficient Fine-Tuning, PEFT
 \section{Modeling Approach}
 
 \subsection{Why Transformers for this Task}
-\lipsum[8]
+Transformers truly shine when there is a strong language component in the problem, and specifically when one can exploit the ambiguity and richness of natural language. Outside of that domain, their use should be carefully justified. Transformers compute contextual representations in which the same token receives a different embedding depending on its surrounding words, making them naturally suited to resolving this kind of lexical ambiguity. Twitter text is characterised by abbreviations, hashtags, and informal language that fall outside the distribution of standard English corpora. BERTweet~\cite{nguyen2020bertweet}, pre-trained on 850 million English tweets, aligns model vocabulary and pre-training distribution with the target domain, making it a more suitable choice than generic alternatives such as BERT~\cite{devlin2019bert}.
 
 \subsection{Baseline: BiLSTM with GloVe Embeddings}
 \lipsum[9]
