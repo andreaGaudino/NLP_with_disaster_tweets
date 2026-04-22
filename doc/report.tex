@@ -158,7 +158,7 @@ Transformers truly shine when there is a strong language component in the proble
 \section{Results}
 
 \subsection{Evaluation Metric}
-\lipsum[16]
+Performance is evaluated using the binary F1-score, consistent with the Kaggle competition metric. Accuracy would be misleading on an imbalanced dataset, as a model predicting the majority class could still achieve high accuracy while performing poorly on the minority class. F1-score balances precision and recall, penalising both false positives (incorrectly flagging a non-disaster tweet) and false negatives (missing a real disaster event). The F1-score balances avoiding false alarms and detecting real disasters. This is important in our context, since both missing a real disaster (false negative) and incorrectly flagging a non-disaster tweet (false positive) can negatively impact the usefulness of the system.
 
 \subsection{Model Comparison}
 
@@ -194,7 +194,12 @@ Transformers truly shine when there is a strong language component in the proble
 % Key insight 3: augmentation hurts LoRA but may help full fine-tuning
 
 \subsection{Use of AI Assistance}
-\lipsum[19]
+
+AI tools were used as an accelerator for development, not as a replacement for critical thinking. Every architectural decision, experimental choice, and line of code was understood, validated, and intentionally included by the team. 
+The primary use of AI was to systematically scan external Kaggle notebooks and research papers, surfacing implementation details that are easy to overlook. Two concrete examples: AI flagged the use of a warmup scheduler (\texttt{warmup\_ratio=0.1}) as a training stability improvement, applied consistently across all Transformer notebooks; and identified that 
+\texttt{finiteautomata/bertweet-base-sentiment-
+analysis} was built on \texttt{vinai/bertweet-base}~\cite{tripathi_bertweet_kaggle}, leading to the adoption of BERTweet as our final model.
+Decisions such as filtering augmented rows from validation, correcting 18 mislabeled samples, and applying back-translation augmentation were made entirely by the team. AI accelerated execution without compromising the  integrity of the research process.
 
 % =============================================================================
 % V. CONCLUSION
@@ -245,6 +250,13 @@ in \textit{Proc. EMNLP}, 2014.
 C. Szegedy et al.,
 ``Rethinking the Inception Architecture for Computer Vision,''
 in \textit{Proc. CVPR}, 2016.
+
+\bibitem{tripathi_bertweet_kaggle}
+D. Tripathi,
+``EDA, Data Augmentation and Prediction with RoBERTa and cTF-IDF,''
+Kaggle Notebook, 2021.
+\url{https://www.kaggle.com/code/deepaktripathiuk/eda-data-augment-predict-with-roberta-n-ctf-idf}
+
 % Label smoothing reference
 
 \end{thebibliography}
