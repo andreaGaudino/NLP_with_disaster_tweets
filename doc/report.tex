@@ -69,21 +69,41 @@ LoRA, DoRA, Parameter-Efficient Fine-Tuning, PEFT
 \section{Dataset Description and Preparation}
 
 \subsection{Dataset Overview}
-\lipsum[3]
+The dataset contains 7{,}613 training samples and 3{,}263 test samples, sourced from the Kaggle competition~\cite{kaggle}. The class distribution is moderately imbalanced: 57.2\% non-disaster (class 0) and 42.8\% disaster (class 1), as shown in Fig.~\ref{fig:target_dist}. This imbalance motivates the use of F1-score over accuracy as the primary evaluation metric.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.45\textwidth]{images/eda_01_target_distribution.png}
+    \caption{Class distribution in the training set.}
+    \label{fig:target_dist}
+\end{figure}
 
 \subsection{Exploratory Data Analysis}
-\lipsum[4]
+Meta-feature analysis reveals systematic differences between the two classes. Disaster tweets are on average longer (108.3 characters vs 95.8) and use longer words (mean word length 6.47 vs 5.87), consistent with the hypothesis that disaster-related content originates more frequently from news agencies writing in formal register, while non-disaster tweets come from individual users using informal language. Keyword analysis confirms this signal: keywords such as \textit{debris}, \textit{derailment}, and \textit{wreckage} have a disaster rate above 95\%, while \textit{body\%20bags} and \textit{aftershock} have rates below 3\% — indicating strong metaphorical or colloquial use. These observations directly motivate the use of contextual embeddings, which can disambiguate the same keyword across different linguistic contexts. Fig.~\ref{fig:meta} shows the distribution of selected meta-features by class.
 
-% Example figure placeholder
-% \begin{figure}[h]
-%     \centering
-%     \includegraphics[width=0.45\textwidth]{figures/eda_target_distribution.png}
-%     \caption{Target class distribution in the training set.}
-%     \label{fig:target_dist}
-% \end{figure}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.48\textwidth]{images/eda_03_meta_features.png}
+    \caption{Meta-feature distributions by class (top row only).}
+    \label{fig:meta}
+\end{figure}
+
+Train and test sets share nearly identical meta-feature distributions (e.g., mean word count 14.90 vs 14.97), confirming that both sets are drawn from the same underlying population and that no distribution shift is expected at inference time.
 
 \subsection{Mislabeled Samples Correction}
-\lipsum[5]
+
+The training set contains 18 tweets that appear multiple times with
+contradictory labels, assigned by different crowdworkers who interpreted
+ambiguous content differently~\cite{evitan2020mislabeled}. Examples
+include religious references to \textit{Hellfire}, metaphorical uses of
+\textit{burning buildings}, and borderline safety warnings such as
+\textit{``Caution: breathing may be hazardous to your health.''}
+Retaining these conflicting duplicates would introduce noise directly
+into the training signal. We identified them by grouping tweets by text
+and flagging those with more than one unique target value, then manually
+assigned the correct label by reading each tweet in context, storing
+the result in a dedicated \texttt{target\_relabeled} column to preserve
+the original annotations.
 
 \subsection{Text Cleaning and Preprocessing}
 \lipsum[6]
@@ -277,7 +297,11 @@ D. Tripathi,
 Kaggle Notebook, 2021.
 \url{https://www.kaggle.com/code/deepaktripathiuk/eda-data-augment-predict-with-roberta-n-ctf-idf}
 
-% Label smoothing reference
+\bibitem{evitan2020mislabeled}
+G. Evitan,
+``NLP with Disaster Tweets — EDA, Cleaning and BERT,''
+Kaggle Notebook, 2020.
+\url{https://www.kaggle.com/code/gunesevitan/nlp-with-disaster-tweets-eda-cleaning-and-bert}
 
 \end{thebibliography}
 
