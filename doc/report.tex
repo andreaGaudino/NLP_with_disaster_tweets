@@ -92,21 +92,11 @@ Train and test sets share nearly identical meta-feature distributions (e.g., mea
 
 \subsection{Mislabeled Samples Correction}
 
-The training set contains 18 tweets that appear multiple times with
-contradictory labels, assigned by different crowdworkers who interpreted
-ambiguous content differently~\cite{evitan2020mislabeled}. Examples
-include religious references to \textit{Hellfire}, metaphorical uses of
-\textit{burning buildings}, and borderline safety warnings such as
-\textit{``Caution: breathing may be hazardous to your health.''}
-Retaining these conflicting duplicates would introduce noise directly
-into the training signal. We identified them by grouping tweets by text
-and flagging those with more than one unique target value, then manually
-assigned the correct label by reading each tweet in context, storing
-the result in a dedicated \texttt{target\_relabeled} column to preserve
-the original annotations.
+The training set contains 18 tweets that appear multiple times with contradictory labels, assigned by different crowdworkers who interpreted ambiguous content differently~\cite{evitan2020mislabeled}. Examples include religious references to \textit{Hellfire}, metaphorical uses of \textit{burning buildings}, and borderline safety warnings such as \textit{``Caution: breathing may be hazardous to your health.''} Retaining these conflicting duplicates would introduce noise directly into the training signal. We identified them by grouping tweets by text and flagging those with more than one unique target value, then manually assigned the correct label by reading each tweet in context, storing the result in a dedicated \texttt{target\_relabeled} column to preserve the original annotations.
 
 \subsection{Text Cleaning and Preprocessing}
-\lipsum[6]
+
+Raw tweets require extensive cleaning before tokenization. Following~\cite{evitan2020mislabeled}, we apply a multi-step pipeline: URLs are removed, character encoding artifacts (e.g., \texttt{\textbackslash x89Ûª}) are stripped, contractions are expanded (\textit{can't} $\rightarrow$ \textit{cannot}), punctuations are separated from words to improve embedding coverage, and common typos and slang are normalised. Compound hashtags and informative usernames (e.g., \texttt{NASAHurricane} $\rightarrow$ \textit{NASA Hurricane}) are expanded into readable tokens, since concatenated words lack embeddings in both GloVe and BERTweet vocabularies. This cleaning step is applied consistently to both training and test sets before any modelling step.
 
 \subsection{Data Augmentation via Back-Translation}
 \lipsum[7]
@@ -170,17 +160,7 @@ Transformers truly shine when there is a strong language component in the proble
 
 \subsection{Label Smoothing and Regularization}
 
-Label smoothing~\cite{szegedy2016rethinking} replaces hard targets
-$\{0, 1\}$ with soft targets $\{\varepsilon/2,\, 1-\varepsilon/2\}$,
-preventing the model from becoming overconfident on ambiguous samples.
-This is particularly relevant in our setting: even after manually
-correcting 18 mislabeled samples, some tweets remain genuinely ambiguous
-due to metaphorical use of disaster-related keywords. Applying
-$\varepsilon = 0.1$ yielded a consistent improvement of $+0.002$ F1
-on the Kaggle leaderboard for LoRA-based models, while slightly hurting
-full fine-tuning — a result consistent with the hypothesis that
-regularisation is more beneficial when the number of trainable parameters
-is small.
+Label smoothing~\cite{szegedy2016rethinking} replaces hard targets $\{0, 1\}$ with soft targets $\{\varepsilon/2,\, 1-\varepsilon/2\}$, preventing the model from becoming overconfident on ambiguous samples. This is particularly relevant in our setting: even after manually correcting 18 mislabeled samples, some tweets remain genuinely ambiguous due to metaphorical use of disaster-related keywords. Applying $\varepsilon = 0.1$ yielded a consistent improvement of $+0.002$ F1 on the Kaggle leaderboard for LoRA-based models, while slightly hurting full fine-tuning — a result consistent with the hypothesis that regularisation is more beneficial when the number of trainable parameters is small.
 % =============================================================================
 % IV. RESULTS
 % =============================================================================
@@ -192,10 +172,7 @@ Performance is evaluated using the binary F1-score, consistent with the Kaggle c
 
 \subsection{Model Comparison}
 
-Table~\ref{tab:results} summarises the results across all models.
-Notably, BERTweet + LoRA achieves the best Kaggle F1 while training
-only 0.65\% of the total parameters, outperforming full fine-tuning
-approaches with orders of magnitude more trainable weights.
+Table~\ref{tab:results} summarises the results across all models. Notably, BERTweet + LoRA achieves the best Kaggle F1 while training only 0.65\% of the total parameters, outperforming full fine-tuning approaches with orders of magnitude more trainable weights.
 
 \begin{table}[h]
 \centering
@@ -238,8 +215,7 @@ BERTweet-large + LoRA (r=16)
 AI tools were used as an accelerator for development, not as a replacement for critical thinking. Every architectural decision, experimental choice, and line of code was understood, validated, and intentionally included by the team. 
 The primary use of AI was to systematically scan external Kaggle notebooks and research papers, surfacing implementation details that are easy to overlook. Two concrete examples: AI flagged the use of a warmup scheduler (\texttt{warmup\_ratio=0.1}) as a training stability improvement, applied consistently across all Transformer notebooks; and identified that 
 \texttt{finiteautomata/bertweet-base-sentiment-
-analysis} was built on \texttt{vinai/bertweet-base}~\cite{tripathi_bertweet_kaggle}, leading to the adoption of BERTweet as our final model.
-Decisions such as filtering augmented rows from validation, correcting 18 mislabeled samples, and applying back-translation augmentation were made entirely by the team. AI accelerated execution without compromising the  integrity of the research process.
+analysis} was built on \texttt{vinai/bertweet-base}~\cite{tripathi_bertweet_kaggle}, leading to the adoption of BERTweet as our final model. Decisions such as filtering augmented rows from validation, correcting 18 mislabeled samples, and applying back-translation augmentation were made entirely by the team. AI accelerated execution without compromising the  integrity of the research process.
 
 % =============================================================================
 % V. CONCLUSION
