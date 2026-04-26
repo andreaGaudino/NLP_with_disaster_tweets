@@ -122,7 +122,7 @@ Transformers truly shine when there is a strong language component in the proble
 \lipsum[10]
 
 \subsection{BERTweet: Domain-Specific Pre-Training}
-\lipsum[11]
+BERTweet shares the same architecture as BERT-base, but it’s pretrained like RoBERTa on English Tweets. It performs really well on Tweet-related tasks like part-of-speech tagging, named entity recognition, and text classification \cite{hugginface_bertweet}. The discovery of BERTweet as a specialized architecture for this task was prompted by community benchmarks \cite{tripathi_bertweet_kaggle}, which highlighted the limitations of general-purpose models when dealing with the idiosyncratic nature of social media language. As described by Nguyen et al. \cite{nguyen2020bertweet}, BERTweet is the first large-scale pre-trained language model for English Tweets, designed to bridge the gap between formal corpora (like Wikipedia or News) and the informal, noise-heavy characteristics of microblogging data. The model adopts the same architecture as $BERT_{base}$ and follows the RoBERTa pre-training procedure \cite{nguyen2020bertweet}. It was trained on a massive 80GB corpus comprising 850M English Tweets (approximately 16B tokens). Specifically, the authors report that BERTweet achieves superior performance in text classification, producing state-of-the-art results on benchmark datasets like SemEval2017 Task 4A and SemEval2018 Task 3A \cite{nguyen2020bertweet}. In the context of disaster tweet classification, this specialization is critical for correctly interpreting hashtags, slang, and the frequent use of informal grammar that characterizes our dataset.
 
 \subsection{Parameter-Efficient Fine-Tuning with LoRA}
 \lipsum[12]
@@ -278,6 +278,11 @@ G. Evitan,
 ``NLP with Disaster Tweets — EDA, Cleaning and BERT,''
 Kaggle Notebook, 2020.
 \url{https://www.kaggle.com/code/gunesevitan/nlp-with-disaster-tweets-eda-cleaning-and-bert}
+
+\bibitem{hugginface_bertweet}
+``BERTweet''
+Huggin Face, 2020.
+\url{https://huggingface.co/docs/transformers/model_doc/bertweet}
 
 \end{thebibliography}
 
