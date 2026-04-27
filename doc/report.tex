@@ -116,13 +116,19 @@ Raw tweets require extensive cleaning before tokenization. Following~\cite{evita
 Transformers truly shine when there is a strong language component in the problem, and specifically when one can exploit the ambiguity and richness of natural language. Outside of that domain, their use should be carefully justified. Transformers compute contextual representations in which the same token receives a different embedding depending on its surrounding words, making them naturally suited to resolving this kind of lexical ambiguity. Twitter text is characterised by abbreviations, hashtags, and informal language that fall outside the distribution of standard English corpora. BERTweet~\cite{nguyen2020bertweet}, pre-trained on 850 million English tweets, aligns model vocabulary and pre-training distribution with the target domain, making it a more suitable choice than generic alternatives such as BERT~\cite{devlin2019bert}.
 
 \subsection{Baseline: BiLSTM with GloVe Embeddings}
-\lipsum[9]
+As a baseline for disaster tweet classification \cite{nikjohn7_kaggle, akashkr_kaggle}, we implemented a recurrent architecture combining pre-trained GloVe embeddings with bidirectional LSTMs. This setup captures semantic and sequential patterns in short, noisy text.
+
+The architecture starts with a foundational layer of \textbf{GloVe (Global Vectors for Word Representation)} embeddings \cite{pennington2014glove}. We utilized 100-dimensional vectors pre-trained on a 6-billion token corpus (Wikipedia + Gigaword). To prevent overfitting on the relatively small training set ($\sim$7k samples), the embedding layer was kept \textbf{frozen}, acting as a robust feature extractor that provides semantic regularities for free \cite{akashkr_kaggle}.
+
+The core of the model consists of \textbf{Bidirectional LSTM (BiLSTM)} layers. Unlike standard LSTMs, BiLSTMs process sequences in both directions, concatenating hidden states to capture the full context of a tweet \cite{akashkr_kaggle}. This is critical for disaster detection, where key terms (e.g., "fire", "flood") may appear at any position. Research shows that BiLSTMs consistently outperform traditional Bag-of-Words and TF-IDF methods by modeling long-term dependencies and word relationships across time steps \cite{nikjohn7_kaggle}.
+
+The final output layer uses a single neuron with Sigmoid activation for binary classification, consistent with the Kaggle task \cite{kaggle}.
 
 \subsection{BERT Fine-Tuning}
 \lipsum[10]
 
 \subsection{BERTweet: Domain-Specific Pre-Training}
-BERTweet shares the same architecture as BERT-base, but it’s pretrained like RoBERTa on English Tweets. It performs really well on Tweet-related tasks like part-of-speech tagging, named entity recognition, and text classification \cite{hugginface_bertweet}. The discovery of BERTweet as a specialized architecture for this task was prompted by community benchmarks \cite{tripathi_bertweet_kaggle}, which highlighted the limitations of general-purpose models when dealing with the idiosyncratic nature of social media language. As described by Nguyen et al. \cite{nguyen2020bertweet}, BERTweet is the first large-scale pre-trained language model for English Tweets, designed to bridge the gap between formal corpora (like Wikipedia or News) and the informal, noise-heavy characteristics of microblogging data. The model adopts the same architecture as $BERT_{base}$ and follows the RoBERTa pre-training procedure \cite{nguyen2020bertweet}. It was trained on a massive 80GB corpus comprising 850M English Tweets (approximately 16B tokens). Specifically, the authors report that BERTweet achieves superior performance in text classification, producing state-of-the-art results on benchmark datasets like SemEval2017 Task 4A and SemEval2018 Task 3A \cite{nguyen2020bertweet}. In the context of disaster tweet classification, this specialization is critical for correctly interpreting hashtags, slang, and the frequent use of informal grammar that characterizes our dataset.
+BERTweet shares the same architecture as BERT-base, but it’s pretrained like RoBERTa on English Tweets. It performs really well on Tweet-related tasks like part-of-speech tagging, named entity recognition, and text classification \cite{huggingface_bertweet}. The discovery of BERTweet as a specialized architecture for this task was prompted by community benchmarks \cite{tripathi_bertweet_kaggle}, which highlighted the limitations of general-purpose models when dealing with the idiosyncratic nature of social media language. As described by Nguyen et al. \cite{nguyen2020bertweet}, BERTweet is the first large-scale pre-trained language model for English Tweets, designed to bridge the gap between formal corpora (like Wikipedia or News) and the informal, noise-heavy characteristics of microblogging data. The model adopts the same architecture as $BERT_{base}$ and follows the RoBERTa pre-training procedure \cite{nguyen2020bertweet}. It was trained on a massive 80GB corpus comprising 850M English Tweets (approximately 16B tokens). Specifically, the authors report that BERTweet achieves superior performance in text classification, producing state-of-the-art results on benchmark datasets like SemEval2017 Task 4A and SemEval2018 Task 3A \cite{nguyen2020bertweet}. In the context of disaster tweet classification, this specialization is critical for correctly interpreting hashtags, slang, and the frequent use of informal grammar that characterizes our dataset.
 
 \subsection{Parameter-Efficient Fine-Tuning with LoRA}
 \lipsum[12]
@@ -279,10 +285,22 @@ G. Evitan,
 Kaggle Notebook, 2020.
 \url{https://www.kaggle.com/code/gunesevitan/nlp-with-disaster-tweets-eda-cleaning-and-bert}
 
-\bibitem{hugginface_bertweet}
+\bibitem{huggingface_bertweet}
 ``BERTweet''
 Huggin Face, 2020.
 \url{https://huggingface.co/docs/transformers/model_doc/bertweet}
+
+\bibitem{nikjohn7_kaggle}
+N. John,
+``Disaster-Tweets-Kaggle: Meaningful Vector Representation using GloVe,''
+GitHub Repository, 2020.
+\url{https://github.com/nikjohn7/Disaster-Tweets-Kaggle}
+
+\bibitem{akashkr_kaggle}
+A. Kumar,
+``TF-Keras Tutorial: Bi-LSTM, GloVe, GRU,''
+Kaggle Notebook, 2021.
+\url{https://www.kaggle.com/code/akashkr/tf-keras-tutorial-bi-lstm-glove-gru-part-6}
 
 \end{thebibliography}
 
