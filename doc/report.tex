@@ -117,121 +117,123 @@ The overall architecture of our proposed system, from raw data ingestion to fina
 % === ULTRA-COMPACT SNAKE-LAYOUT TIKZ PIPELINE ===
 \begin{figure}[htbp]
     \centering
-    \resizebox{\columnwidth}{!}{%
-    \begin{tikzpicture}[
-        >=Latex,
-        font=\sffamily\scriptsize,
-        % Styles for nodes
-        base/.style={draw, rectangle, align=center, fill=white, inner sep=3pt, thick, minimum height=0.5cm},
-        rawdata/.style={base, double, double distance=1.5pt, text width=3.8cm}, % Rettangolo dentro rettangolo
-        highlight/.style={base, fill=gray!15},
-        rounded/.style={base, rounded corners=1ex},
-        high_rounded/.style={rounded, fill=gray!15},
-        % Group/Subgraph style
-        groupbox/.style={draw, black!60, dashed, inner sep=7pt, rounded corners=0.8ex, fill=black!2}, % Margine interno aumentato
-        grouplabel/.style={font=\sffamily\bfseries\tiny, text=black!80},
-        % Arrows
-        arrow/.style={->, thick, draw=black!80}
-    ]
+    %\resizebox{\columnwidth}{!}{%
+    %\begin{tikzpicture}[
+    %    >=Latex,
+    %    font=\sffamily\scriptsize,
+    %    % Styles for nodes
+    %    base/.style={draw, rectangle, align=center, fill=white, inner sep=3pt, thick, minimum height=0.5cm},
+    %    rawdata/.style={base, double, double distance=1.5pt, text width=3.8cm}, % Rettangolo dentro rettangolo
+    %    highlight/.style={base, fill=gray!15},
+    %    rounded/.style={base, rounded corners=1ex},
+    %    high_rounded/.style={rounded, fill=gray!15},
+    %    % Group/Subgraph style
+    %    groupbox/.style={draw, black!60, dashed, inner sep=7pt, rounded corners=0.8ex, fill=black!2}, % Margine interno aumentato
+    %    grouplabel/.style={font=\sffamily\bfseries\tiny, text=black!80},
+    %    % Arrows
+    %    arrow/.style={->, thick, draw=black!80}
+    %]
 
     % X-Coordinates for the 2-column internal layout
-    \def\xLeft{-1.85}
-    \def\xRight{1.85}
-    \def\xCenter{0}
+    %\def\xLeft{-1.85}
+    %\def\xRight{1.85}
+    %\def\xCenter{0}
 
     % --- DATABASE ---
-    \node[rawdata] (DB) at (\xCenter, 0) 
-        {\textbf{Raw Twitter Data}};
+    %\node[rawdata] (DB) at (\xCenter, 0) 
+    %    {\textbf{Raw Twitter Data}};
 
     % --- PHASE 1: Preprocessing ---
-    \node[base, text width=3.4cm] (MF) at (\xLeft, -1.3) 
-        {\textbf{1a. Feature Extraction}\\(Words, URLs, Tags)};
-    \node[base, text width=3.4cm] (MC) at (\xRight, -1.3) 
-        {\textbf{1b. Label Correction}\\(Resolve conflicts)};
-    \node[base, text width=7.4cm] (TC) at (\xCenter, -2.4) 
-        {\textbf{1c. Text Cleaning Pipeline} (URLs, encodings)};
+    %\node[base, text width=3.4cm] (MF) at (\xLeft, -1.3) 
+    %    {\textbf{1a. Feature Extraction}\\(Words, URLs, Tags)};
+    %\node[base, text width=3.4cm] (MC) at (\xRight, -1.3) 
+    %    {\textbf{1b. Label Correction}\\(Resolve conflicts)};
+    %\node[base, text width=7.4cm] (TC) at (\xCenter, -2.4) 
+    %    {\textbf{1c. Text Cleaning Pipeline} (URLs, encodings)};
 
-    \begin{scope}[on background layer]
-        \node[groupbox, fit=(MF) (MC) (TC)] (Phase1) {};
-        \node[grouplabel, above right=1pt and 0pt of Phase1.north west] {1. Preprocessing};
-    \end{scope}
+    %\begin{scope}[on background layer]
+    %    \node[groupbox, fit=(MF) (MC) (TC)] (Phase1) {};
+    %    \node[grouplabel, above right=1pt and 0pt of Phase1.north west] {1. Preprocessing};
+    %\end{scope}
 
-    \draw[arrow] (DB.south) -- (0, -0.65) -| (MF.north);
-    \draw[arrow] (MF.east) -- (MC.west);
-    \draw[arrow] (MC.south) -- (TC.north -| MC.south);
+    %\draw[arrow] (DB.south) -- (0, -0.65) -| (MF.north);
+    %\draw[arrow] (MF.east) -- (MC.west);
+    %\draw[arrow] (MC.south) -- (TC.north -| MC.south);
 
     % --- PHASE 2: Augmentation & Split ---
-    \node[base, text width=3.4cm] (BT) at (\xLeft, -3.8) 
-        {\textbf{2a. Data Augmentation}\\(Back-Translation)};
-    \node[base, text width=3.4cm] (SPLIT) at (\xRight, -3.8) 
-        {\textbf{2b. Train/Val Split}\\(90\% / 10\%)};
+    %\node[base, text width=3.4cm] (BT) at (\xLeft, -3.8) 
+    %    {\textbf{2a. Data Augmentation}\\(Back-Translation)};
+    %\node[base, text width=3.4cm] (SPLIT) at (\xRight, -3.8) 
+    %    {\textbf{2b. Train/Val Split}\\(90\% / 10\%)};
 
-    \begin{scope}[on background layer]
-        \node[groupbox, fit=(BT) (SPLIT)] (Phase2) {};
-        \node[grouplabel, above right=-2pt and -2pt of Phase2.north west] {2. Augmentation \& Split};
-    \end{scope}
+    %\begin{scope}[on background layer]
+    %    \node[groupbox, fit=(BT) (SPLIT)] (Phase2) {};
+    %    \node[grouplabel, above right=-2pt and -2pt of Phase2.north west] {2. Augmentation \& Split};
+    %\end{scope}
 
-    \draw[arrow] (TC.south -| BT.north) -- (BT.north);
-    \draw[arrow] (BT.east) -- (SPLIT.west);
+    %\draw[arrow] (TC.south -| BT.north) -- (BT.north);
+    %\draw[arrow] (BT.east) -- (SPLIT.west);
 
     % --- PHASE 3: Modeling ---
-    \node[base, text width=7.4cm] (TOK) at (\xCenter, -5.2) 
-        {\textbf{3a. Tokenization} (e.g., BERTweet)};
+    %\node[base, text width=7.4cm] (TOK) at (\xCenter, -5.2) 
+    %    {\textbf{3a. Tokenization} (e.g., BERTweet)};
 
-    \node[base, text width=2.2cm, font=\sffamily\tiny] (M1) at (-2.6, -6.5) 
-        {\textbf{Baseline}\\BiLSTM+GloVe\\$\sim$1M Params};
-    \node[base, text width=2.2cm, font=\sffamily\tiny] (M2) at (\xCenter, -6.5) 
-        {\textbf{Full Tune}\\BERTweet\\$\sim$135M Params};
-    \node[highlight, text width=2.2cm, font=\sffamily\tiny] (M3) at (2.6, -6.5) 
-        {\textbf{PEFT}\\BERTweet+LoRA\\$\sim$887K Params};
+    %\node[base, text width=2.2cm, font=\sffamily\tiny] (M1) at (-2.6, -6.5) 
+    %    {\textbf{Baseline}\\BiLSTM+GloVe\\$\sim$1M Params};
+    %\node[base, text width=2.2cm, font=\sffamily\tiny] (M2) at (\xCenter, -6.5) 
+    %    {\textbf{Full Tune}\\BERTweet\\$\sim$135M Params};
+    %\node[highlight, text width=2.2cm, font=\sffamily\tiny] (M3) at (2.6, -6.5) 
+    %    {\textbf{PEFT}\\BERTweet+LoRA\\$\sim$887K Params};
 
-    \begin{scope}[on background layer]
-        \node[groupbox, fit=(TOK) (M1) (M2) (M3)] (Phase3) {};
-        \node[grouplabel, above right=-2pt and 0pt of Phase3.north west] {3. Modeling Strategy};
-    \end{scope}
+    %\begin{scope}[on background layer]
+    %    \node[groupbox, fit=(TOK) (M1) (M2) (M3)] (Phase3) {};
+    %    \node[grouplabel, above right=-2pt and 0pt of Phase3.north west] {3. Modeling Strategy};
+    %\end{scope}
 
-    \draw[arrow] (SPLIT.south) -- (TOK.north -| SPLIT.south);
-    \draw[arrow] (TOK.south -| M1.north) -- (M1.north);
-    \draw[arrow] (TOK.south) -- (M2.north);
-    \draw[arrow] (TOK.south -| M3.north) -- (M3.north);
+    %\draw[arrow] (SPLIT.south) -- (TOK.north -| SPLIT.south);
+    %\draw[arrow] (TOK.south -| M1.north) -- (M1.north);
+    %\draw[arrow] (TOK.south) -- (M2.north);
+    %\draw[arrow] (TOK.south -| M3.north) -- (M3.north);
 
     % --- PHASE 4: Training & Evaluation ---
-    \node[base, text width=3.4cm] (TRAIN) at (\xLeft, -8.2) 
-        {\textbf{4a. Model Training}\\(+ Label Smoothing)};
-    \node[base, text width=3.4cm] (VAL) at (\xRight, -8.2) 
-        {\textbf{4b. Model Validation}\\(Evaluate F1-Score)};
+    %\node[base, text width=3.4cm] (TRAIN) at (\xLeft, -8.2) 
+    %    {\textbf{4a. Model Training}\\(+ Label Smoothing)};
+    %\node[base, text width=3.4cm] (VAL) at (\xRight, -8.2) 
+    %    {\textbf{4b. Model Validation}\\(Evaluate F1-Score)};
 
-    \begin{scope}[on background layer]
-        \node[groupbox, fit=(TRAIN) (VAL)] (Phase4) {};
-        \node[grouplabel, above right=-2pt and -3pt of Phase4.north west] {4. Training \& Eval};
-    \end{scope}
+    %\begin{scope}[on background layer]
+    %    \node[groupbox, fit=(TRAIN) (VAL)] (Phase4) {};
+    %    \node[grouplabel, above right=-2pt and -3pt of Phase4.north west] {4. Training \& Eval};
+    %\end{scope}
 
-    \coordinate (merge) at (\xCenter, -7.3);
-    \draw[thick, draw=black!80] (M1.south) |- (merge);
-    \draw[thick, draw=black!80] (M3.south) |- (merge);
-    \draw[thick, draw=black!80] (M2.south) -- (merge);
-    \draw[arrow] (merge) -| (TRAIN.north); 
+    %\coordinate (merge) at (\xCenter, -7.3);
+    %\draw[thick, draw=black!80] (M1.south) |- (merge);
+    %\draw[thick, draw=black!80] (M3.south) |- (merge);
+    %\draw[thick, draw=black!80] (M2.south) -- (merge);
+    %\draw[arrow] (merge) -| (TRAIN.north); 
 
-    \draw[arrow] (TRAIN.east) -- (VAL.west);
+    %\draw[arrow] (TRAIN.east) -- (VAL.west);
 
     % --- PHASE 5: Testing & Inference ---
-    \node[base, text width=7.4cm] (TEST) at (\xCenter, -9.6) 
-        {\textbf{5a. Test Set Inference} (Unseen Data)};
-    \node[high_rounded, text width=7.4cm] (OUT) at (\xCenter, -10.6) 
-        {\textbf{5b. Final Classification} (Disaster vs Normal)};
+    %\node[base, text width=7.4cm] (TEST) at (\xCenter, -9.6) 
+    %    {\textbf{5a. Test Set Inference} (Unseen Data)};
+    %\node[high_rounded, text width=7.4cm] (OUT) at (\xCenter, -10.6) 
+    %    {\textbf{5b. Final Classification} (Disaster vs Normal)};
 
-    \begin{scope}[on background layer]
-        \node[groupbox, fit=(TEST) (OUT)] (Phase5) {};
-        \node[grouplabel, above right=-2pt and 0pt of Phase5.north west] {5. Inference};
-    \end{scope}
+    %\begin{scope}[on background layer]
+    %    \node[groupbox, fit=(TEST) (OUT)] (Phase5) {};
+    %    \node[grouplabel, above right=-2pt and 0pt of Phase5.north west] {5. Inference};
+    %\end{scope}
 
-    \draw[arrow] (VAL.south) -- (TEST.north -| VAL.south);
-    \draw[arrow] (TEST.south) -- (OUT.north);
+    %\draw[arrow] (VAL.south) -- (TEST.north -| VAL.south);
+    %\draw[arrow] (TEST.south) -- (OUT.north);
 
-    \end{tikzpicture}%
-    }
-    \caption{End-to-end pipeline for disaster tweet classification: optimized layout tracking data flow from ingestion to inference.}
-    \label{fig:pipeline_snake_compact} 
+    %\end{tikzpicture}%
+    %}
+    \includegraphics[width=0.6\columnwidth]{images/tikz-1.png}
+    
+    \caption{End-to-end pipeline for disaster tweet classification.}
+    \label{fig:pipeline_snake_compact}
 \end{figure}
 
 \subsection{Why Transformers for this Task}
