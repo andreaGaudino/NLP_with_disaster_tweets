@@ -357,7 +357,7 @@ analysis} was built on \texttt{vinai/bertweet-base}~\cite{tripathi_bertweet_kagg
 % =============================================================================
 
 \section{Conclusion}
-\lipsum[20]
+In this study, we explored a comprehensive progression of NLP models for the classification of disaster-related tweets, ranging from recurrent BiLSTM architectures to state-of-the-art Transformers. Our experiments demonstrate that domain-specific pre-training (BERTweet) significantly outperforms general-purpose models in capturing the idiosyncratic nature of social media language. Furthermore, the adoption of Parameter-Efficient Fine-Tuning (PEFT), specifically through LoRA and DoRA, proved highly effective; by training only 0.65\% of total parameters, we achieved a peak F1-score of 0.847, surpassing full fine-tuning performance while drastically reducing computational overhead. While our results are robust, the disambiguation of metaphorical language remains an open challenge. Future research could integrate sentiment and emotion analysis to further refine classification, as the underlying intent of a tweet often provides critical context for disaster detection \ref{mahalavanya_github}. Overall, participating in this Kaggle competition was an enlightening experience that allowed us to bridge the gap between theoretical NLP concepts and practical, efficient model deployment.  The complete codebase, experiments, and implementation details of this project are publicly available at our repository \cite{our_github}.
 
 % =============================================================================
 % REFERENCES
@@ -430,6 +430,15 @@ A. Kumar,
 ``TF-Keras Tutorial: Bi-LSTM, GloVe, GRU,''
 Kaggle Notebook, 2021.
 \url{https://www.kaggle.com/code/akashkr/tf-keras-tutorial-bi-lstm-glove-gru-part-6}
+
+\bibitem{our_github}
+S. P. Candido, A. Gaudino, D. Gosmar, and A. Kallas, 
+``NLP with Disaster Tweets: From Sequential Models to Parameter-Efficient Transformers,'' 
+GitHub Repository, 2024. [Online]. Available: \url{https://github.com/andreaGaudino/NLP_with_disaster_tweets}
+
+\bibitem{mahalavanya_github}
+M. Sriram, ``Natural Language Processing with Disaster Tweets,'' 
+GitHub Repository, 2020. [Online]. Available: \url{https://github.com/MahalavanyaSriram/Natural-Language-Processing-with-Disaster-Tweets}
 
 \end{thebibliography}
 
