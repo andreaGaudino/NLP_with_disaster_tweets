@@ -10,6 +10,10 @@
 \usepackage{hyperref}
 \usepackage{lipsum}
 
+% === TIKZ PACKAGES FOR DIAGRAM ===
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds, calc}
+
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 
@@ -60,9 +64,7 @@ LoRA, DoRA, Parameter-Efficient Fine-Tuning, PEFT
 % =============================================================================
 
 \section{Introduction}
-\lipsum[2]
-
-% =============================================================================
+The main aim of our project is to distinguish if a tweet talks about a real disaster or not. This is for a competition hosted by Kaggle \cite{kaggle} and the dataset provided consisting of 7,613 training and 3,263 test samples with hand classified tweets on which we built our models. The core challenge lies in disambiguating actual emergency reports from metaphorical uses of disaster terminology.  Our methodology progressed from a recurrent baseline (BiLSTM with GloVe embeddings) to state-of-the-art Transformer architectures. To optimize performance on domain-specific social media text, we compared general-purpose BERT with BERTweet. Furthermore, we mitigated computational overhead and overfitting risks by implementing Parameter-Efficient Fine-Tuning (PEFT) techniques, specifically LoRA and DoRA.  Results demonstrate that BERTweet combined with LoRA achieves superior performance, reaching a peak F1-score of 0.847. Notably, this approach requires training only 0.65\% of total parameters ($\sim$887K weights), proving that PEFT strategies, coupled with label smoothing, can outperform traditional full fine-tuning in both efficiency and accuracy.% =============================================================================
 % II. DATASET DESCRIPTION AND PREPARATION
 % =============================================================================
 
@@ -99,18 +101,138 @@ The training set contains 18 tweets that appear multiple times with contradictor
 Raw tweets require extensive cleaning before tokenization. Following~\cite{evitan2020mislabeled}, we apply a multi-step pipeline: URLs are removed, character encoding artifacts (e.g., \texttt{\textbackslash x89Ûª}) are stripped, contractions are expanded (\textit{can't} $\rightarrow$ \textit{cannot}), punctuations are separated from words to improve embedding coverage, and common typos and slang are normalised. Compound hashtags and informative usernames (e.g., \texttt{NASAHurricane} $\rightarrow$ \textit{NASA Hurricane}) are expanded into readable tokens, since concatenated words lack embeddings in both GloVe and BERTweet vocabularies. This cleaning step is applied consistently to both training and test sets before any modelling step.
 
 \subsection{Data Augmentation via Back-Translation}
-\lipsum[7]
 
-% Explain why augmentation helps full fine-tuning but hurts LoRA:
-% LoRA trains only 0.65% of parameters — noisy back-translations confuse
-% the few trainable weights. Full fine-tuning has enough capacity to
-% filter noise; PEFT cannot.
+Since we are utilizing Transformer-based models, the available training data may be insufficient for the model to learn its weights efficiently. Data augmentation for raw text is notoriously difficult compared to computer vision; while an image can be rotated or flipped without losing its meaning, text is fragile.
+
+To address this, we implemented a back-translation pipeline. We first translate the English source text into a linguistically distant language—in our case, Hindi—and then translate it back into English. Because Hindi employs a different script (Devanagari) and distinct grammatical structures, the resulting English output often retains the original sentiment and semantics but utilizes varied syntax and synonyms. This process teaches the model that different linguistic paths can lead to the same conceptual destination, effectively increasing the diversity of our dataset.
 
 % =============================================================================
 % III. MODELING APPROACH
 % =============================================================================
 
 \section{Modeling Approach}
+
+The overall architecture of our proposed system, from raw data ingestion to final inference, is illustrated in Fig.~\ref{fig:pipeline_snake_compact}. The pipeline consists of five main phases: data preprocessing, augmentation, architecture selection, model training, and final inference. Each phase is detailed in the following subsections.
+
+% === ULTRA-COMPACT SNAKE-LAYOUT TIKZ PIPELINE ===
+\begin{figure}[htbp]
+    \centering
+    \resizebox{\columnwidth}{!}{%
+    \begin{tikzpicture}[
+        >=Latex,
+        font=\sffamily\scriptsize,
+        % Styles for nodes
+        base/.style={draw, rectangle, align=center, fill=white, inner sep=3pt, thick, minimum height=0.5cm},
+        rawdata/.style={base, double, double distance=1.5pt, text width=3.8cm}, % Rettangolo dentro rettangolo
+        highlight/.style={base, fill=gray!15},
+        rounded/.style={base, rounded corners=1ex},
+        high_rounded/.style={rounded, fill=gray!15},
+        % Group/Subgraph style
+        groupbox/.style={draw, black!60, dashed, inner sep=7pt, rounded corners=0.8ex, fill=black!2}, % Margine interno aumentato
+        grouplabel/.style={font=\sffamily\bfseries\tiny, text=black!80},
+        % Arrows
+        arrow/.style={->, thick, draw=black!80}
+    ]
+
+    % X-Coordinates for the 2-column internal layout
+    \def\xLeft{-1.85}
+    \def\xRight{1.85}
+    \def\xCenter{0}
+
+    % --- DATABASE ---
+    \node[rawdata] (DB) at (\xCenter, 0) 
+        {\textbf{Raw Twitter Data}};
+
+    % --- PHASE 1: Preprocessing ---
+    \node[base, text width=3.4cm] (MF) at (\xLeft, -1.3) 
+        {\textbf{1a. Feature Extraction}\\(Words, URLs, Tags)};
+    \node[base, text width=3.4cm] (MC) at (\xRight, -1.3) 
+        {\textbf{1b. Label Correction}\\(Resolve conflicts)};
+    \node[base, text width=7.4cm] (TC) at (\xCenter, -2.4) 
+        {\textbf{1c. Text Cleaning Pipeline} (URLs, encodings)};
+
+    \begin{scope}[on background layer]
+        \node[groupbox, fit=(MF) (MC) (TC)] (Phase1) {};
+        \node[grouplabel, above right=1pt and 0pt of Phase1.north west] {1. Preprocessing};
+    \end{scope}
+
+    \draw[arrow] (DB.south) -- (0, -0.65) -| (MF.north);
+    \draw[arrow] (MF.east) -- (MC.west);
+    \draw[arrow] (MC.south) -- (TC.north -| MC.south);
+
+    % --- PHASE 2: Augmentation & Split ---
+    \node[base, text width=3.4cm] (BT) at (\xLeft, -3.8) 
+        {\textbf{2a. Data Augmentation}\\(Back-Translation)};
+    \node[base, text width=3.4cm] (SPLIT) at (\xRight, -3.8) 
+        {\textbf{2b. Train/Val Split}\\(90\% / 10\%)};
+
+    \begin{scope}[on background layer]
+        \node[groupbox, fit=(BT) (SPLIT)] (Phase2) {};
+        \node[grouplabel, above right=-2pt and -2pt of Phase2.north west] {2. Augmentation \& Split};
+    \end{scope}
+
+    \draw[arrow] (TC.south -| BT.north) -- (BT.north);
+    \draw[arrow] (BT.east) -- (SPLIT.west);
+
+    % --- PHASE 3: Modeling ---
+    \node[base, text width=7.4cm] (TOK) at (\xCenter, -5.2) 
+        {\textbf{3a. Tokenization} (e.g., BERTweet)};
+
+    \node[base, text width=2.2cm, font=\sffamily\tiny] (M1) at (-2.6, -6.5) 
+        {\textbf{Baseline}\\BiLSTM+GloVe\\$\sim$1M Params};
+    \node[base, text width=2.2cm, font=\sffamily\tiny] (M2) at (\xCenter, -6.5) 
+        {\textbf{Full Tune}\\BERTweet\\$\sim$135M Params};
+    \node[highlight, text width=2.2cm, font=\sffamily\tiny] (M3) at (2.6, -6.5) 
+        {\textbf{PEFT}\\BERTweet+LoRA\\$\sim$887K Params};
+
+    \begin{scope}[on background layer]
+        \node[groupbox, fit=(TOK) (M1) (M2) (M3)] (Phase3) {};
+        \node[grouplabel, above right=-2pt and 0pt of Phase3.north west] {3. Modeling Strategy};
+    \end{scope}
+
+    \draw[arrow] (SPLIT.south) -- (TOK.north -| SPLIT.south);
+    \draw[arrow] (TOK.south -| M1.north) -- (M1.north);
+    \draw[arrow] (TOK.south) -- (M2.north);
+    \draw[arrow] (TOK.south -| M3.north) -- (M3.north);
+
+    % --- PHASE 4: Training & Evaluation ---
+    \node[base, text width=3.4cm] (TRAIN) at (\xLeft, -8.2) 
+        {\textbf{4a. Model Training}\\(+ Label Smoothing)};
+    \node[base, text width=3.4cm] (VAL) at (\xRight, -8.2) 
+        {\textbf{4b. Model Validation}\\(Evaluate F1-Score)};
+
+    \begin{scope}[on background layer]
+        \node[groupbox, fit=(TRAIN) (VAL)] (Phase4) {};
+        \node[grouplabel, above right=-2pt and -3pt of Phase4.north west] {4. Training \& Eval};
+    \end{scope}
+
+    \coordinate (merge) at (\xCenter, -7.3);
+    \draw[thick, draw=black!80] (M1.south) |- (merge);
+    \draw[thick, draw=black!80] (M3.south) |- (merge);
+    \draw[thick, draw=black!80] (M2.south) -- (merge);
+    \draw[arrow] (merge) -| (TRAIN.north); 
+
+    \draw[arrow] (TRAIN.east) -- (VAL.west);
+
+    % --- PHASE 5: Testing & Inference ---
+    \node[base, text width=7.4cm] (TEST) at (\xCenter, -9.6) 
+        {\textbf{5a. Test Set Inference} (Unseen Data)};
+    \node[high_rounded, text width=7.4cm] (OUT) at (\xCenter, -10.6) 
+        {\textbf{5b. Final Classification} (Disaster vs Normal)};
+
+    \begin{scope}[on background layer]
+        \node[groupbox, fit=(TEST) (OUT)] (Phase5) {};
+        \node[grouplabel, above right=-2pt and 0pt of Phase5.north west] {5. Inference};
+    \end{scope}
+
+    \draw[arrow] (VAL.south) -- (TEST.north -| VAL.south);
+    \draw[arrow] (TEST.south) -- (OUT.north);
+
+    \end{tikzpicture}%
+    }
+    \caption{End-to-end pipeline for disaster tweet classification: optimized layout tracking data flow from ingestion to inference.}
+    \label{fig:pipeline_snake_compact} 
+\end{figure}
 
 \subsection{Why Transformers for this Task}
 Transformers truly shine when there is a strong language component in the problem, and specifically when one can exploit the ambiguity and richness of natural language. Outside of that domain, their use should be carefully justified. Transformers compute contextual representations in which the same token receives a different embedding depending on its surrounding words, making them naturally suited to resolving this kind of lexical ambiguity. Twitter text is characterised by abbreviations, hashtags, and informal language that fall outside the distribution of standard English corpora. BERTweet~\cite{nguyen2020bertweet}, pre-trained on 850 million English tweets, aligns model vocabulary and pre-training distribution with the target domain, making it a more suitable choice than generic alternatives such as BERT~\cite{devlin2019bert}.
@@ -158,8 +280,15 @@ BERTweet shares the same architecture as BERT-base, but it’s pretrained like R
 \lipsum[13]
 
 \subsection{Why Augmentation Hurts LoRA but May Help Full Fine-Tuning}
-\lipsum[14]
+While data augmentation is a staple in deep learning, its effectiveness varies significantly depending on the fine-tuning strategy.
 
+ In Full Fine-Tuning, every parameter in the model is updated ($W = W_0 + \Delta W$). Because the model has a massive degree of freedom, it is prone to overfitting on small, repetitive datasets. Augmentation acts as a regularizer. By providing back-translated variations, the model is forced to learn generalized features rather than memorizing specific patterns or "noise" in the original training set. It expands the decision boundary, making the model more robust.
+
+LoRA freezes the original weights and only trains a small pair of rank-decomposition matrices. The update is represented as: $\Delta W = BA$ where $B$ and $A$ are low-rank matrices. LoRA is designed to be parameter-efficient. It excels at learning specific tasks or styles from high-quality, "clean" data. If the back-translation process introduces even slight semantic drift or grammatical "hallucinations" (a common side effect of translation models), LoRA may capture this noise as a primary signal. Because the rank (capacity) of LoRA is limited, every training sample must be high-signal. Low-quality augmented data can "pollute" the small number of trainable parameters, leading to a model that is less precise than one trained on a smaller, pristine dataset.
+% Explain why augmentation helps full fine-tuning but hurts LoRA:
+% LoRA trains only 0.65% of parameters — noisy back-translations confuse
+% the few trainable weights. Full fine-tuning has enough capacity to
+% filter noise; PEFT cannot.
 % Core argument: noise tolerance scales with the number of trainable
 % parameters. LoRA with 887K trainable params cannot filter noisy
 % back-translations the way full fine-tuning with 135M params can.
