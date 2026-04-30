@@ -249,7 +249,7 @@ The core of the model consists of \textbf{Bidirectional LSTM (BiLSTM)} layers. U
 The final output layer uses a single neuron with Sigmoid activation for binary classification, consistent with the Kaggle task \cite{kaggle}.
 
 \subsection{BERT Fine-Tuning}
-\lipsum[10]
+Fine-tuning is the process of adapting a pre-trained model to solve a specific problem using target data, making state-of-the-art deep learning accessible without the need for massive computational resources \cite{prof_lecture}. To adapt BERT for our binary classification task, we add a task-specific output layer on top of the pre-trained architecture and update all the model parameters jointly \cite{sun2019how}. This end-to-end training allows the model to tailor its deep, contextual understanding of language directly to our domain, squeezing every drop of performance for our specific use case \cite{medium_bert}. In our experiments, we fine-tune \texttt{vinai/bertweet-base} ($\sim$135M parameters) for 3 epochs at \texttt{lr=2e-5} with warmup~\cite{devlin2019bert}, achieving a validation F1 of 0.827 and a Kaggle score of 0.839.
 
 \subsection{BERTweet: Domain-Specific Pre-Training}
 BERTweet shares the same architecture as BERT-base, but it’s pretrained like RoBERTa on English Tweets. It performs really well on Tweet-related tasks like part-of-speech tagging, named entity recognition, and text classification \cite{huggingface_bertweet}. The discovery of BERTweet as a specialized architecture for this task was prompted by community benchmarks \cite{tripathi_bertweet_kaggle}, which highlighted the limitations of general-purpose models when dealing with the idiosyncratic nature of social media language. As described by Nguyen et al. \cite{nguyen2020bertweet}, BERTweet is the first large-scale pre-trained language model for English Tweets, designed to bridge the gap between formal corpora (like Wikipedia or News) and the informal, noise-heavy characteristics of microblogging data. The model adopts the same architecture as $BERT_{base}$ and follows the RoBERTa pre-training procedure \cite{nguyen2020bertweet}. It was trained on a massive 80GB corpus comprising 850M English Tweets (approximately 16B tokens). Specifically, the authors report that BERTweet achieves superior performance in text classification, producing state-of-the-art results on benchmark datasets like SemEval2017 Task 4A and SemEval2018 Task 3A \cite{nguyen2020bertweet}. In the context of disaster tweet classification, this specialization is critical for correctly interpreting hashtags, slang, and the frequent use of informal grammar that characterizes our dataset.
@@ -441,6 +441,15 @@ GitHub Repository, 2024. [Online]. Available: \url{https://github.com/andreaGaud
 \bibitem{mahalavanya_github}
 M. Sriram, ``Natural Language Processing with Disaster Tweets,'' 
 GitHub Repository, 2020. [Online]. Available: \url{https://github.com/MahalavanyaSriram/Natural-Language-Processing-with-Disaster-Tweets}
+
+\bibitem{prof_lecture}
+EURECOM, ``Convolutional Neural Networks,'' Deep Learning Course, 2026. [Online]. Available: \url{https://eurecom-ds.github.io/deeplearning/editions/2026/slides/conv_nets.html#/title-slide}
+
+\bibitem{sun2019how}
+C. Sun, X. Qiu, Y. Xu, and X. Huang, ``How to Fine-Tune BERT for Text Classification?,'' \textit{arXiv preprint arXiv:1905.05583}, 2019.
+
+\bibitem{medium_bert}
+A. Amit, ``Fine-tuning BERT for Classification: A Practical Guide,'' Medium, 2023. [Online]. Available: \url{https://medium.com/@heyamit10/fine-tuning-bert-for-classification-a-practical-guide-b8c1c56f252c}
 
 \end{thebibliography}
 
