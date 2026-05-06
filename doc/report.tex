@@ -64,7 +64,7 @@ LoRA, DoRA, Parameter-Efficient Fine-Tuning, PEFT
 % =============================================================================
 
 \section{Introduction}
-The main aim of our project is to distinguish if a tweet talks about a real disaster or not. This is for a competition hosted by Kaggle \cite{kaggle} and the dataset provided consisting of 7,613 training and 3,263 test samples with hand classified tweets on which we built our models. The core challenge lies in disambiguating actual emergency reports from metaphorical uses of disaster terminology.  Our methodology progressed from a recurrent baseline (BiLSTM with GloVe embeddings) to state-of-the-art Transformer architectures. To optimize performance on domain-specific social media text, we compared general-purpose BERT with BERTweet. Furthermore, we mitigated computational overhead and overfitting risks by implementing Parameter-Efficient Fine-Tuning (PEFT) techniques, specifically LoRA and DoRA.  Results demonstrate that BERTweet combined with LoRA achieves superior performance, reaching a peak F1-score of 0.847. Notably, this approach requires training only 0.65\% of total parameters ($\sim$887K weights), proving that PEFT strategies, coupled with label smoothing, can outperform traditional full fine-tuning in both efficiency and accuracy.% =============================================================================
+The main aim of our project is to distinguish if a tweet talks about a real disaster or not. This is for a competition hosted by Kaggle \cite{kaggle} and the dataset provided consisting of 7,613 training and 3,263 test samples with hand classified tweets on which we built our models. The core challenge lies in disambiguating actual emergency reports from metaphorical uses of disaster terminology. Our methodology progressed from a recurrent baseline (BiLSTM with GloVe embeddings) to state-of-the-art Transformer architectures. To optimize performance on domain-specific social media text, we compared general-purpose BERT with BERTweet. Furthermore, we mitigated computational overhead and overfitting risks by implementing Parameter-Efficient Fine-Tuning (PEFT) techniques, specifically LoRA and DoRA.  Results demonstrate that BERTweet combined with LoRA achieves superior performance, reaching a peak F1-score of 0.847. Notably, this approach requires training only 0.65\% of total parameters ($\sim$887K weights), proving that PEFT strategies, coupled with label smoothing, can outperform traditional full fine-tuning in both efficiency and accuracy.% =============================================================================
 % II. DATASET DESCRIPTION AND PREPARATION
 % =============================================================================
 
@@ -98,13 +98,11 @@ The training set contains 18 tweets that appear multiple times with contradictor
 
 \subsection{Text Cleaning and Preprocessing}
 
-Raw tweets require extensive cleaning before tokenization. Following~\cite{evitan2020mislabeled}, we apply a multi-step pipeline: URLs are removed, character encoding artifacts (e.g., \texttt{\textbackslash x89Ûª}) are stripped, contractions are expanded (\textit{can't} $\rightarrow$ \textit{cannot}), punctuations are separated from words to improve embedding coverage, and common typos and slang are normalised. Compound hashtags and informative usernames (e.g., \texttt{NASAHurricane} $\rightarrow$ \textit{NASA Hurricane}) are expanded into readable tokens, since concatenated words lack embeddings in both GloVe and BERTweet vocabularies. This cleaning step is applied consistently to both training and test sets before any modelling step.
+Raw tweets require extensive cleaning before tokenization. Following~\cite{evitan2020mislabeled}, we apply a multi-step pipeline: URLs are removed, character encoding artifacts (e.g., \texttt{\textbackslash x89Ûª}) are stripped, contractions are expanded (\textit{can't} $\rightarrow$ \textit{cannot}), punctuations are separated from words to improve embedding coverage, and common typos and slang are normalised. Compound hashtags and informative usernames (e.g., \texttt{NASAHurricane} $\rightarrow$ \textit{NASA Hurricane}) are expanded into readable tokens, since concatenated words lack embeddings in both GloVe and BERTweet vocabularies. This cleaning step is applied consistently to both training and test sets before any modelling step. Prior to any preprocessing step, missing values in the \texttt{keyword} and \texttt{location} columns were filled with a placeholder string (\texttt{no\_keyword}, \texttt{no\_location}) to avoid downstream errors in feature extraction. No missing values were found in the \texttt{text} column.
 
 \subsection{Data Augmentation via Back-Translation}
 
-Since we are utilizing Transformer-based models, the available training data may be insufficient for the model to learn its weights efficiently. Data augmentation for raw text is notoriously difficult compared to computer vision; while an image can be rotated or flipped without losing its meaning, text is fragile.
-
-To address this, we implemented a back-translation pipeline. We first translate the English source text into a linguistically distant language—in our case, Hindi—and then translate it back into English. Because Hindi employs a different script (Devanagari) and distinct grammatical structures, the resulting English output often retains the original sentiment and semantics but utilizes varied syntax and synonyms. This process teaches the model that different linguistic paths can lead to the same conceptual destination, effectively increasing the diversity of our dataset.
+Since we are utilizing Transformer-based models, the available training data may be insufficient for the model to learn its weights efficiently. Data augmentation for raw text is notoriously difficult compared to computer vision; while an image can be rotated or flipped without losing its meaning, text is fragile. To address this, we implemented a back-translation pipeline. We first translate the English source text into a linguistically distant language—in our case, Hindi—and then translate it back into English. Because Hindi employs a different script (Devanagari) and distinct grammatical structures, the resulting English output often retains the original sentiment and semantics but utilizes varied syntax and synonyms. This process teaches the model that different linguistic paths can lead to the same conceptual destination, effectively increasing the diversity of our dataset. The interaction between this augmentation strategy and the chosen fine-tuning approach is discussed in Section \ref{subsec:dataaugmentation} in light of experimental results. The augmented set doubled the training data to $\sim$15{,}000 samples.
 
 % =============================================================================
 % III. MODELING APPROACH
@@ -114,127 +112,17 @@ To address this, we implemented a back-translation pipeline. We first translate 
 
 The overall architecture of our proposed system, from raw data ingestion to final inference, is illustrated in Fig.~\ref{fig:pipeline_snake_compact}. The pipeline consists of five main phases: data preprocessing, augmentation, architecture selection, model training, and final inference. Each phase is detailed in the following subsections.
 
-% === ULTRA-COMPACT SNAKE-LAYOUT TIKZ PIPELINE ===
+% === ULTRA-COMPACT SNAKE-LAYOUT PIPELINE ===
 \begin{figure}[htbp]
     \centering
-    %\resizebox{\columnwidth}{!}{%
-    %\begin{tikzpicture}[
-    %    >=Latex,
-    %    font=\sffamily\scriptsize,
-    %    % Styles for nodes
-    %    base/.style={draw, rectangle, align=center, fill=white, inner sep=3pt, thick, minimum height=0.5cm},
-    %    rawdata/.style={base, double, double distance=1.5pt, text width=3.8cm}, % Rettangolo dentro rettangolo
-    %    highlight/.style={base, fill=gray!15},
-    %    rounded/.style={base, rounded corners=1ex},
-    %    high_rounded/.style={rounded, fill=gray!15},
-    %    % Group/Subgraph style
-    %    groupbox/.style={draw, black!60, dashed, inner sep=7pt, rounded corners=0.8ex, fill=black!2}, % Margine interno aumentato
-    %    grouplabel/.style={font=\sffamily\bfseries\tiny, text=black!80},
-    %    % Arrows
-    %    arrow/.style={->, thick, draw=black!80}
-    %]
-
-    % X-Coordinates for the 2-column internal layout
-    %\def\xLeft{-1.85}
-    %\def\xRight{1.85}
-    %\def\xCenter{0}
-
-    % --- DATABASE ---
-    %\node[rawdata] (DB) at (\xCenter, 0) 
-    %    {\textbf{Raw Twitter Data}};
-
-    % --- PHASE 1: Preprocessing ---
-    %\node[base, text width=3.4cm] (MF) at (\xLeft, -1.3) 
-    %    {\textbf{1a. Feature Extraction}\\(Words, URLs, Tags)};
-    %\node[base, text width=3.4cm] (MC) at (\xRight, -1.3) 
-    %    {\textbf{1b. Label Correction}\\(Resolve conflicts)};
-    %\node[base, text width=7.4cm] (TC) at (\xCenter, -2.4) 
-    %    {\textbf{1c. Text Cleaning Pipeline} (URLs, encodings)};
-
-    %\begin{scope}[on background layer]
-    %    \node[groupbox, fit=(MF) (MC) (TC)] (Phase1) {};
-    %    \node[grouplabel, above right=1pt and 0pt of Phase1.north west] {1. Preprocessing};
-    %\end{scope}
-
-    %\draw[arrow] (DB.south) -- (0, -0.65) -| (MF.north);
-    %\draw[arrow] (MF.east) -- (MC.west);
-    %\draw[arrow] (MC.south) -- (TC.north -| MC.south);
-
-    % --- PHASE 2: Augmentation & Split ---
-    %\node[base, text width=3.4cm] (BT) at (\xLeft, -3.8) 
-    %    {\textbf{2a. Data Augmentation}\\(Back-Translation)};
-    %\node[base, text width=3.4cm] (SPLIT) at (\xRight, -3.8) 
-    %    {\textbf{2b. Train/Val Split}\\(90\% / 10\%)};
-
-    %\begin{scope}[on background layer]
-    %    \node[groupbox, fit=(BT) (SPLIT)] (Phase2) {};
-    %    \node[grouplabel, above right=-2pt and -2pt of Phase2.north west] {2. Augmentation \& Split};
-    %\end{scope}
-
-    %\draw[arrow] (TC.south -| BT.north) -- (BT.north);
-    %\draw[arrow] (BT.east) -- (SPLIT.west);
-
-    % --- PHASE 3: Modeling ---
-    %\node[base, text width=7.4cm] (TOK) at (\xCenter, -5.2) 
-    %    {\textbf{3a. Tokenization} (e.g., BERTweet)};
-
-    %\node[base, text width=2.2cm, font=\sffamily\tiny] (M1) at (-2.6, -6.5) 
-    %    {\textbf{Baseline}\\BiLSTM+GloVe\\$\sim$1M Params};
-    %\node[base, text width=2.2cm, font=\sffamily\tiny] (M2) at (\xCenter, -6.5) 
-    %    {\textbf{Full Tune}\\BERTweet\\$\sim$135M Params};
-    %\node[highlight, text width=2.2cm, font=\sffamily\tiny] (M3) at (2.6, -6.5) 
-    %    {\textbf{PEFT}\\BERTweet+LoRA\\$\sim$887K Params};
-
-    %\begin{scope}[on background layer]
-    %    \node[groupbox, fit=(TOK) (M1) (M2) (M3)] (Phase3) {};
-    %    \node[grouplabel, above right=-2pt and 0pt of Phase3.north west] {3. Modeling Strategy};
-    %\end{scope}
-
-    %\draw[arrow] (SPLIT.south) -- (TOK.north -| SPLIT.south);
-    %\draw[arrow] (TOK.south -| M1.north) -- (M1.north);
-    %\draw[arrow] (TOK.south) -- (M2.north);
-    %\draw[arrow] (TOK.south -| M3.north) -- (M3.north);
-
-    % --- PHASE 4: Training & Evaluation ---
-    %\node[base, text width=3.4cm] (TRAIN) at (\xLeft, -8.2) 
-    %    {\textbf{4a. Model Training}\\(+ Label Smoothing)};
-    %\node[base, text width=3.4cm] (VAL) at (\xRight, -8.2) 
-    %    {\textbf{4b. Model Validation}\\(Evaluate F1-Score)};
-
-    %\begin{scope}[on background layer]
-    %    \node[groupbox, fit=(TRAIN) (VAL)] (Phase4) {};
-    %    \node[grouplabel, above right=-2pt and -3pt of Phase4.north west] {4. Training \& Eval};
-    %\end{scope}
-
-    %\coordinate (merge) at (\xCenter, -7.3);
-    %\draw[thick, draw=black!80] (M1.south) |- (merge);
-    %\draw[thick, draw=black!80] (M3.south) |- (merge);
-    %\draw[thick, draw=black!80] (M2.south) -- (merge);
-    %\draw[arrow] (merge) -| (TRAIN.north); 
-
-    %\draw[arrow] (TRAIN.east) -- (VAL.west);
-
-    % --- PHASE 5: Testing & Inference ---
-    %\node[base, text width=7.4cm] (TEST) at (\xCenter, -9.6) 
-    %    {\textbf{5a. Test Set Inference} (Unseen Data)};
-    %\node[high_rounded, text width=7.4cm] (OUT) at (\xCenter, -10.6) 
-    %    {\textbf{5b. Final Classification} (Disaster vs Normal)};
-
-    %\begin{scope}[on background layer]
-    %    \node[groupbox, fit=(TEST) (OUT)] (Phase5) {};
-    %    \node[grouplabel, above right=-2pt and 0pt of Phase5.north west] {5. Inference};
-    %\end{scope}
-
-    %\draw[arrow] (VAL.south) -- (TEST.north -| VAL.south);
-    %\draw[arrow] (TEST.south) -- (OUT.north);
-
-    %\end{tikzpicture}%
-    %}
     \includegraphics[width=0.6\columnwidth]{images/tikz-1.png}
-    
     \caption{End-to-end pipeline for disaster tweet classification.}
     \label{fig:pipeline_snake_compact}
 \end{figure}
+
+\subsection{Start Point: Machine Learning (Non-Deep) Approach}
+
+As a non-deep lower bound, we first evaluate a TF-IDF representation combined with Logistic Regression~\cite{tunguz_tfidf_kaggle}. This approach treats each tweet as a bag of words, discarding word order and context entirely. As noted in the literature, deep learning is not always a silver bullet~\cite{silver_bullet_nlp}: simpler models can be bcompetitive on small, well-curated datasets, and their limitations must be demonstrated empirically before introducing more complex architectures. TF-IDF + Logistic Regression achieves a validation F1 of 0.730 and a Kaggle F1 of 0.791 — clearly below BiLSTM (0.810) and Transformer-based models. This confirms that bag-of-words representations are insufficient for this task, without word order or contextual information, the model cannot disambiguate identical keywords used in both literal and metaphorical contexts, directly motivating the use of sequential and contextual models.
 
 \subsection{Why Transformers for this Task}
 Transformers truly shine when there is a strong language component in the problem, and specifically when one can exploit the ambiguity and richness of natural language. Outside of that domain, their use should be carefully justified. Transformers compute contextual representations in which the same token receives a different embedding depending on its surrounding words, making them naturally suited to resolving this kind of lexical ambiguity. Twitter text is characterised by abbreviations, hashtags, and informal language that fall outside the distribution of standard English corpora. BERTweet~\cite{nguyen2020bertweet}, pre-trained on 850 million English tweets, aligns model vocabulary and pre-training distribution with the target domain, making it a more suitable choice than generic alternatives such as BERT~\cite{devlin2019bert}.
@@ -243,19 +131,16 @@ Transformers truly shine when there is a strong language component in the proble
 As a baseline for disaster tweet classification, we implemented a recurrent architecture combining pre-trained GloVe \cite{nikjohn7_kaggle} embeddings with bidirectional LSTMs \cite{akashkr_kaggle}. This setup captures semantic and sequential patterns in short, noisy text. The architecture starts with a foundational layer of \textbf{GloVe (Global Vectors for Word Representation)} embeddings \cite{pennington2014glove}. We utilized 100-dimensional vectors pre-trained on a 6-billion token corpus (Wikipedia + Gigaword). To prevent overfitting on the relatively small training set ($\sim$7k samples), the embedding layer was kept \textbf{frozen}, acting as a robust feature extractor that provides semantic regularities for free \cite{akashkr_kaggle}. The core of the model consists of \textbf{Bidirectional LSTM (BiLSTM)} layers. Unlike standard LSTMs, BiLSTMs process sequences in both directions, concatenating hidden states to capture the full context of a tweet \cite{akashkr_kaggle}. This is critical for disaster detection, where key terms (e.g., "fire", "flood") may appear at any position. Research shows that BiLSTMs consistently outperform traditional Bag-of-Words and TF-IDF methods by modeling long-term dependencies and word relationships across time steps \cite{nikjohn7_kaggle}. The final output layer uses a single neuron with Sigmoid activation for binary classification, consistent with the Kaggle task \cite{kaggle}.
 
 \subsection{BERT Fine-Tuning}
-Fine-tuning is the process of adapting a pre-trained model to solve a specific problem using target data, making state-of-the-art deep learning accessible without the need for massive computational resources \cite{prof_lecture}. To adapt BERT for our binary classification task, we add a task-specific output layer on top of the pre-trained architecture and update all the model parameters jointly \cite{sun2019how}. This end-to-end training allows the model to tailor its deep, contextual understanding of language directly to our domain, squeezing every drop of performance for our specific use case \cite{medium_bert}. In our experiments, we fine-tuned the \texttt{bert-base-uncased} model ($\sim$110M parameters) as a general-purpose Transformer baseline. The model was trained for 3 epochs with a learning rate of \texttt{2e-5} and a 10\% warmup ratio to ensure stability during the initial phase of optimization.
+Fine-tuning is the process of adapting a pre-trained model to solve a specific problem using target data, making state-of-the-art deep learning accessible without the need for massive computational resources \cite{prof_lecture}. To adapt BERT for our binary classification task, we add a task-specific output layer on top of the pre-trained architecture and update all the model parameters jointly \cite{sun2019how}. This end-to-end training allows the model to tailor its deep, contextual understanding of language directly to our domain, maximizing task-specific performance within our domain \cite{medium_bert}. In our experiments, we fine-tuned the \texttt{bert-base-uncased} model ($\sim$110M parameters) as a general-purpose Transformer baseline. The model was trained for 3 epochs with a learning rate of \texttt{2e-5} and a 10\% warmup ratio to ensure stability during the initial phase of optimization.
 
 \subsection{BERTweet: Domain-Specific Pre-Training}
-BERTweet shares the same architecture as BERT-base, but it’s pretrained like RoBERTa on English Tweets. It performs really well on Tweet-related tasks like part-of-speech tagging, named entity recognition, and text classification \cite{huggingface_bertweet}. The discovery of BERTweet as a specialized architecture for this task was prompted by community benchmarks \cite{tripathi_bertweet_kaggle}, which highlighted the limitations of general-purpose models when dealing with the idiosyncratic nature of social media language. As described by Nguyen et al. \cite{nguyen2020bertweet}, BERTweet is the first large-scale pre-trained language model for English Tweets, designed to bridge the gap between formal corpora (like Wikipedia or News) and the informal, noise-heavy characteristics of microblogging data. The model adopts the same architecture as BERT-base and follows the RoBERTa pre-training procedure \cite{nguyen2020bertweet}. It was trained on a massive 80GB corpus comprising 850M English Tweets (approximately 16B tokens). Specifically, the authors report that BERTweet achieves superior performance in text classification, producing state-of-the-art results on benchmark datasets like SemEval2017 Task 4A and SemEval2018 Task 3A \cite{nguyen2020bertweet}. In the context of disaster tweet classification, this specialization is critical for correctly interpreting hashtags, slang, and the frequent use of informal grammar that characterizes our dataset.
+BERTweet shares the same architecture as BERT-base, but it’s pretrained like RoBERTa on English Tweets. It achieves strong performance on Tweet-related tasks like part-of-speech tagging, named entity recognition, and text classification \cite{huggingface_bertweet}. The discovery of BERTweet as a specialized architecture for this task was prompted by community benchmarks \cite{tripathi_bertweet_kaggle}, which highlighted the limitations of general-purpose models when dealing with the idiosyncratic nature of social media language. As described by Nguyen et al. \cite{nguyen2020bertweet}, BERTweet is the first large-scale pre-trained language model for English Tweets, designed to bridge the gap between formal corpora (like Wikipedia or News) and the informal, noise-heavy characteristics of microblogging data. The model adopts the same architecture as BERT-base and follows the RoBERTa pre-training procedure \cite{nguyen2020bertweet}. It was trained on a massive 80GB corpus comprising 850M English Tweets (approximately 16B tokens). Specifically, the authors report that BERTweet achieves superior performance in text classification, producing state-of-the-art results on benchmark datasets like SemEval2017 Task 4A and SemEval2018 Task 3A \cite{nguyen2020bertweet}. In the context of disaster tweet classification, this specialization is critical for correctly interpreting hashtags, slang, and the frequent use of informal grammar that characterizes our dataset.
 
 \subsection{Parameter-Efficient Fine-Tuning with LoRA}
 To address computational overhead and the risk of overfitting on a relatively small training dataset, we implemented Parameter-Efficient Fine-Tuning (PEFT), specifically focusing on Low-Rank Adaptation (LoRA)\cite{hu2021lora}. Unlike traditional full fine-tuning, which updates all approximately 135 million parameters of the BERTweet architecture, LoRA freezes the original pre-trained weights and injects small, trainable rank-decomposition matrices into the model's attention layers. Mathematically, for a given weight matrix $W$, the update is represented as $W' = W + BA$, where $B$ and $A$ are low-rank matrices. LoRA's rank configuration enables reducing the number of trainable parameters to a fraction of a percent compared to the totality updated in full fine-tuning. This efficiency stands in stark contrast to both full fine-tuning, which updates 100\% of the Transformer's parameters, and our baseline BiLSTM model, which also requires training 100\% of its approximately 1 million parameters. This massive reduction not only accelerates training and decreases memory usage, but also serves as an effective regularizer to mitigate overfitting risks on social media text.
 
 \subsection{DoRA: Weight-Decomposition Low-Rank Adaptation}
 DoRA (Weight-Decomposition Low-Rank Adaptation) is an evolution of LoRA that decomposes the pre-trained weight matrix into two distinct components: \textbf{magnitude} and \textbf{direction} \cite{prof_lecture, liu2024dora}. While standard LoRA updates both simultaneously through low-rank matrices, DoRA decouples them, allowing the model to learn directional updates ($D$) via low-rank adaptation while explicitly tuning a trainable magnitude vector ($m$) \cite{prof_lecture}. Theoretically, this addresses LoRA's limitation in capturing magnitude changes independently, potentially leading to superior performance on complex tasks \cite{liu2024dora}. However, empirical evidence suggests that DoRA's theoretical superiority does not always translate into higher accuracy across all tasks. On simpler datasets or architectures, the added complexity of learning separate magnitude parameters can result in slower convergence or even performance lag compared to the simpler LoRA framework \cite{ullah2025lora}.
-
-\subsection{Why Augmentation Hurts LoRA but May Help Full Fine-Tuning}
-While data augmentation is a staple in deep learning, its effectiveness varies significantly depending on the fine-tuning strategy. In Full Fine-Tuning, every parameter in the model is updated ($W = W_0 + \Delta W$). Because the model has a massive degree of freedom, it is prone to overfitting on small, repetitive datasets. Augmentation acts as a regularizer. By providing back-translated variations, the model is forced to learn generalized features rather than memorizing specific patterns or "noise" in the original training set. It expands the decision boundary, making the model more robust. LoRA freezes the original weights and only trains a small pair of rank-decomposition matrices. The update is represented as: $\Delta W = BA$ where $B$ and $A$ are low-rank matrices. LoRA is designed to be parameter-efficient. It excels at learning specific tasks or styles from high-quality, "clean" data. If the back-translation process introduces even slight semantic drift or grammatical "hallucinations" (a common side effect of translation models), LoRA may capture this noise as a primary signal. Because the rank (capacity) of LoRA is limited, every training sample must be high-signal. Low-quality augmented data can "pollute" the small number of trainable parameters, leading to a model that is less precise than one trained on a smaller, pristine dataset.
 
 \subsection{Label Smoothing and Regularization}
 
@@ -267,7 +152,7 @@ Label smoothing~\cite{szegedy2016rethinking} replaces hard targets $\{0, 1\}$ wi
 \section{Results}
 
 \subsection{Evaluation Metric}
-Performance is evaluated using the binary F1-score, consistent with the Kaggle competition metric. Accuracy would be misleading on an imbalanced dataset, as a model predicting the majority class could still achieve high accuracy while performing poorly on the minority class. F1-score balances precision and recall, penalising both false positives (incorrectly flagging a non-disaster tweet) and false negatives (missing a real disaster event). The F1-score balances avoiding false alarms and detecting real disasters. This is important in our context, since both missing a real disaster (false negative) and incorrectly flagging a non-disaster tweet (false positive) can negatively impact the usefulness of the system.
+Performance is evaluated using the binary F1-score, consistent with the Kaggle competition metric. Accuracy would be misleading on an imbalanced dataset, as a model predicting the majority class could still achieve high accuracy while performing poorly on the minority class. F1-score balances precision and recall, penalising both false positives (incorrectly flagging a non-disaster tweet) and false negatives (missing a real disaster event). This is important in our context, since both missing a real disaster (false negative) and incorrectly flagging a non-disaster tweet (false positive) can negatively impact the usefulness of the system.
 
 \subsection{Model Comparison}
 
@@ -283,6 +168,8 @@ Table~\ref{tab:results} summarises the results across all models. Notably, BERTw
 \toprule
 Model & Val F1 & Kaggle F1 & Params \\
 \midrule
+TF-IDF + Logistic Regression
+    & 0.730 & 0.791 & — (non-deep) \\
 BiLSTM + GloVe 100d
     & 0.776 & 0.810 & $\sim$1M (100\%) \\
 BERT fine-tuning
@@ -304,15 +191,34 @@ BERTweet-large + LoRA (r=16)
 
 \subsection{Key Findings}
 
-Our experimental evaluation yielded several critical insights regarding the interplay between parameter capacity, regularization, and data augmentation in domain-specific language models: Our baseline BERTweet model was fully fine-tuned for 3 epochs at a learning rate of \texttt{lr=2e-5} with warmup~\cite{devlin2019bert}, utilizing all $\sim$135 million parameters to achieve a Kaggle F1-score of 0.839. In contrast, by configuring LoRA~\cite{hu2021lora} with a rank of $r=8$, we reduced the trainable parameter footprint to just 887,042 weights (0.65\% of the total model). Ultimately, this parameter-efficient strategy proved highly successful; the BERTweet model combined with LoRA achieved a peak Kaggle F1-score of 0.847, yielding superior performance compared to traditional full fine-tuning while drastically minimizing computational costs. While our DoRA~\cite{liu2024dora} implementation (rank $r=16$) also achieved a highly competitive Kaggle F1-score of 0.841, it was slightly outperformed by the simpler LoRA framework. This result aligns with findings that on specific domains, the simplicity of LoRA can act as a more effective regularizer, whereas DoRA's magnitude component may require more training epochs or higher-signal data to fully realize its potential \cite{ullah2025lora}. BERTweet outperformed standard BERT by 0.005 on the Kaggle leaderboard. Despite BERT's higher validation score, BERTweet's domain-specific pre-training on 850M tweets proved more effective at generalizing to the informal and noisy language of disaster-related microblogging. We observed that \textbf{label smoothing} interacts differently depending on the chosen fine-tuning strategy. Applying a smoothing factor of $\varepsilon = 0.1$ yielded a consistent improvement of $+0.002$ F1 on the Kaggle leaderboard for our LoRA-based models~\cite{ullah2025lora}. Conversely, the exact same parameter slightly hurt the performance of the fully fine-tuned BERTweet model~\cite{medium_bert}. This contrasting result demonstrates that explicit regularization is far more beneficial when the number of trainable parameters is strictly limited. Finally, our \textbf{back-translation augmentation experiments} revealed contrasting effects on model performance. While augmented data helped full fine-tuning act as a regularizer against its massive degree of freedom, it actively degraded the performance of the LoRA models. Because LoRA's capacity is constrained by its low-rank matrices, it requires high-signal data to learn efficiently; the slight semantic drift and grammatical noise introduced by the back-translation process "\textit{polluted}" LoRA's limited trainable parameters, resulting in a less precise model than one trained solely on pristine data.
+Our experimental evaluation yielded several critical insights regarding the interplay between parameter capacity, regularization, and data augmentation in domain-specific language models.
 
+\textbf{LoRA outperforms full fine-tuning with a fraction of parameters.}
+Our baseline BERTweet model, fully fine-tuned for 3 epochs at \texttt{lr=2e-5} with warmup~\cite{devlin2019bert}, utilizes all $\sim$135M parameters to achieve a Kaggle F1-score of 0.839. LoRA~\cite{hu2021lora} with rank $r=8$ — the default recommended in the original paper as sufficient for most NLP classification tasks — reduces the trainable footprint to just 887,042 weights (0.65\%), while achieving a superior Kaggle F1-score of 0.847.
+
+\textbf{DoRA does not improve over LoRA on this domain.}
+Our DoRA~\cite{liu2024dora} implementation used rank $r=16$ to compensate for the added complexity of decoupling magnitude and direction, yet reached only 0.841. This confirms that LoRA's simplicity acts as a more effective regularizer on this domain~\cite{ullah2025lora}: DoRA's magnitude component appears to require more training epochs or higher-signal data to fully realize its theoretical potential.
+
+\textbf{Domain-specific pre-training generalizes better than BERT.}
+BERTweet outperformed standard BERT by 0.005 on the Kaggle leaderboard. Despite BERT achieving a higher validation score, BERTweet's pre-training on 850M tweets proved more effective at generalizing to the informal and noisy language of disaster-related microblogging.
+
+\textbf{Label smoothing benefits parameter-constrained models.}
+Applying a smoothing factor of $\varepsilon = 0.1$ yielded a consistent improvement of $+0.002$ F1 on the Kaggle leaderboard for LoRA-based models~\cite{ullah2025lora}, while the same parameter slightly degraded the fully fine-tuned BERTweet model~\cite{medium_bert}. This confirms that explicit regularization is most beneficial when the number of trainable parameters is strictly limited.
+
+\textbf{Back-translation augmentation hurts LoRA but helps
+full fine-tuning.}
+Augmented data acted as a regularizer for full fine-tuning, whose massive parameter space is prone to overfitting on small datasets. Conversely, it degraded LoRA performance: because low-rank matrices have limited capacity, every training sample must carry a strong signal. The semantic drift and grammatical noise introduced by back-translation effectively polluted LoRA's trainable parameters, yielding a less precise model than one trained on the original, unaugmented data alone.
+
+\subsection{Effect of Data Augmentation on Fine-Tuning Strategy}
+\label{subsec:dataaugmentation}
+While data augmentation is a staple in deep learning, its effectiveness varies significantly depending on the fine-tuning strategy. In Full Fine-Tuning, every parameter in the model is updated ($W = W_0 + \Delta W$). Because the model has a massive degree of freedom, it is prone to overfitting on small, repetitive datasets. Augmentation acts as a regularizer. By providing back-translated variations, the model is forced to learn generalized features rather than memorizing specific patterns or "noise" in the original training set. It expands the decision boundary, making the model more robust. LoRA freezes the original weights and only trains a small pair of rank-decomposition matrices. The update is represented as: $\Delta W = BA$ where $B$ and $A$ are low-rank matrices. LoRA is designed to be parameter-efficient. It excels at learning specific tasks or styles from high-quality, "clean" data. If the back-translation process introduces even slight semantic drift or grammatical "hallucinations" (a common side effect of translation models), LoRA may capture this noise as a primary signal. Because the rank (capacity) of LoRA is limited, every training sample must be high-signal. Low-quality augmented data can "pollute" the small number of trainable parameters, leading to a model that is less precise than one trained on a smaller, pristine dataset.
 
 % =============================================================================
 % V. CONCLUSION
 % =============================================================================
 
 \section{Conclusion}
-In this study, we explored a comprehensive progression of NLP models for the classification of disaster-related tweets, ranging from recurrent BiLSTM architectures to state-of-the-art Transformers. Our experiments demonstrate that domain-specific pre-training (BERTweet) slightly outperforms general-purpose models in capturing the idiosyncratic nature of social media language. Furthermore, the adoption of Parameter-Efficient Fine-Tuning (PEFT), specifically through LoRA and DoRA, proved highly effective; by training only 0.65\% of total parameters, we achieved a peak F1-score of 0.847, surpassing full fine-tuning performance while drastically reducing computational overhead. While our results are robust, the disambiguation of metaphorical language remains an open challenge. Future research could integrate sentiment and emotion analysis to further refine classification, as the underlying intent of a tweet often provides critical context for disaster detection \cite{mahalavanya_github}. Overall, participating in this Kaggle competition was an enlightening experience that allowed us to bridge the gap between theoretical NLP concepts and practical, efficient model deployment.  The complete codebase, experiments, and implementation details of this project are publicly available at our repository \cite{our_github}.
+In this study, we explored a progressive series of NLP architectures for disaster tweet classification, from a recurrent BiLSTM baseline  to domain-specific Transformers with parameter-efficient fine-tuning. Domain-specific pre-training (BERTweet) proved more effective than  general-purpose BERT at capturing the informal, noisy nature of social  media language. More strikingly, PEFT via LoRA demonstrated that  drastically reducing the number of trainable parameters not only cuts  computational cost, but can actually improve generalization —  outperforming full fine-tuning on this domain. While our results are robust, the disambiguation of metaphorical language remains an open challenge. Future research could integrate sentiment and emotion analysis to further refine classification, as the underlying intent of a tweet often provides critical context for disaster detection \cite{mahalavanya_github}. Future work could explore two promising directions: multimodal classification, incorporating images attached to tweets alongside text~\cite{basit2023multimodal}; and semi-supervised learning, leveraging the large volume of unlabelled social media data to reduce dependence on hand-annotated samples~\cite{popovici2025multihead}. Overall, participating in this Kaggle competition was an enlightening experience that allowed us to apply state-of-the-art NLP methods to a real-world classification task under computational constraints. The complete  codebase is publicly available at~\cite{our_github}.
 
 % =============================================================================
 % VI. Use of AI Assistance
@@ -417,6 +323,29 @@ A. Amit, ``Fine-tuning BERT for Classification: A Practical Guide,'' Medium, 202
 
 \bibitem{ullah2025lora}
 I. Ullah, ``LoRA vs DoRA on MNIST: When Theory Meets Reality,'' Medium, 2025. [Online]. Available: \url{https://imranullahds.medium.com/lora-vs-dora-on-mnist-when-theory-meets-reality-be277176c2ea}
+
+\bibitem{basit2023multimodal}
+M. Basit, B. Alam, Z. Fatima, and S. Shaikh,
+``Natural Disaster Tweets Classification Using Multimodal Data,''
+in \textit{Proc. Conference on Empirical Methods in Natural Language
+Processing (EMNLP)}, Singapore, Dec. 2023, pp. 7584--7594.
+
+\bibitem{popovici2025multihead}
+R.-A. Popovici and T. Rebedea,
+``Multihead Average Pseudo-Margin Learning for Disaster Tweet
+Classification,''
+\textit{Information}, vol. 16, no. 6, p. 434, May 2025.
+
+\bibitem{tunguz_tfidf_kaggle}
+B. Tunguz,
+``Twitter Disaster with TF-IDF and LR,''
+Kaggle Notebook, 2020.
+\url{https://www.kaggle.com/code/tunguz/twitter-disaster-with-tf-idf-and-lr/notebook}
+
+\bibitem{silver_bullet_nlp}
+``Deep Learning May Not Be the Silver Bullet for All NLP Tasks Just Yet,''
+Towards Data Science, 2019.
+\url{https://towardsdatascience.com/deep-learning-may-not-be-the-silver-bullet-for-all-nlp-tasks-just-yet-7e83405b8359/}
 
 \end{thebibliography}
 
