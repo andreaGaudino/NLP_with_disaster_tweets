@@ -1,26 +1,6 @@
 # Project: Natural Language Processing with Disaster Tweets
 
-<!-- TOC -->
 
-- [Project: Natural Language Processing with Disaster Tweets](#project-natural-language-processing-with-disaster-tweets)
-    - [Introduction](#introduction)
-        - [Abstract](#abstract)
-        - [Dataset Description](#dataset-description)
-        - [Metrics Description](#metrics-description)
-    - [Setup](#setup)
-        - [Python Version](#python-version)
-        - [Create and Activate the Virtual Environment](#create-and-activate-the-virtual-environment)
-        - [Install Dependencies](#install-dependencies)
-        - [Download External Data](#download-external-data)
-            - [Kaggle competition data](#kaggle-competition-data)
-            - [GloVe embeddings required for bilstm_glove.ipynb](#glove-embeddings-required-for-bilstm_gloveipynb)
-        - [Run the Notebooks](#run-the-notebooks)
-    - [Project Structure](#project-structure)
-    - [Results](#results)
-    - [Use of AI Assistance](#use-of-ai-assistance)
-    - [References](#references)
-
-<!-- /TOC -->
 
 ## Introduction
 
@@ -129,7 +109,8 @@ Run the notebooks **in order** — each one depends on files produced by the pre
 |-------|----------|----------|
 | 1 | `notebook/data_cleaning_augmentation.ipynb` | `data/augmented_train.csv`, `data/test_cleaned.csv` |
 | 2 | `notebook/eda.ipynb` | plots in `images/` |
-| 3 | `notebook/bilstm_glove.ipynb` | `data/submission_bilstm_glove.csv`, models in `models/` |
+| 3 | `notebook/ml.ipynb` | `data/submission_tfidf_lr.csv` — non-deep baseline |
+| 4 | `notebook/bilstm_glove.ipynb` | `data/submission_bilstm_glove.csv`, models in `models/` |
 
 To run in VS Code:
 1. Open the project folder in VS Code.
@@ -168,6 +149,7 @@ NLP_with_disaster_tweets/
 │   ├── test_cleaned.csv                           # Cleaned test data (generated)
 │   ├── submission_bilstm_glove.csv                # BiLSTM + GloVe predictions (Kaggle: 0.809)
 │   ├── submission_bert.csv                        # BERT fine-tuning predictions (Kaggle: 0.839)
+│   ├── submission_tfidf_lr.csv                    # TF-IDF + LR predictions (Kaggle: 0.791)
 │   └── submission_bert_lora.csv                   # BERT + LoRA predictions (Kaggle: 0.827)
 ├── models/
 │   ├── bert/                                      # BERT checkpoints (generated, not on git)
@@ -179,6 +161,7 @@ NLP_with_disaster_tweets/
 │   ├── eda.ipynb                                  # Exploratory data analysis
 │   ├── bilstm_glove.ipynb                         # BiLSTM + GloVe baseline (OOF F1: 0.776, Kaggle: 0.809)
 │   ├── bert.ipynb                                 # BERT fine-tuning (Val F1: 0.838, Kaggle: 0.839)
+|   ├── ml.ipynb                                   # TF-IDF + LR non-deep baseline (Val F1: 0.730, Kaggle: 0.791)
 │   └── bert_lora.ipynb                            # BERT + LoRA — PEFT (Val F1: 0.827, Kaggle: 0.827)
 ├── .gitignore
 ├── readme.md
@@ -189,9 +172,10 @@ NLP_with_disaster_tweets/
 
 | Model | Val F1 | Kaggle Public F1 | Trainable params |
 |-------|--------|------------------|-----------------|
+| TF-IDF + Logistic Regression | 0.730 | 0.791 | — (non-deep baseline) |
 | BiLSTM + GloVe 100d | 0.776 (OOF, 5-fold CV) | 0.809 | ~1M (100%) |
 | BERTweet fine-tuning (vinai/bertweet-base) | 0.821 | 0.839 | ~135M (100%) |
-| BERTtweet + LoRA (r=8, query+value) | 0.8128 | **0.84737** | ~887K (0.65%) |
+| BERTweet + LoRA (r=8, query+value) | 0.813 | **0.847** | ~887K (0.65%) |
 
 ## Use of AI Assistance
 
@@ -226,3 +210,5 @@ The result is a project where AI accelerated execution without  compromising the
 - berttweet: https://www.kaggle.com/code/deepaktripathiuk/eda-data-augment-predict-with-roberta-n-ctf-idf
 - berttweet 2: https://github.com/vinairesearch/bertweet
 - berttweet 3: https://huggingface.co/docs/transformers/model_doc/bertweet
+- TF-IDF + LR baseline: https://www.kaggle.com/code/tunguz/twitter-disaster-with-tf-idf-and-lr/notebook
+- Deep learning as silver bullet: https://towardsdatascience.com/deep-learning-may-not-be-the-silver-bullet-for-all-nlp-tasks-just-yet-7e83405b8359/
